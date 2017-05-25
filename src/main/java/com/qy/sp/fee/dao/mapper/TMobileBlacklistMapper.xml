@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.MobileBlacklistDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TMobileBlacklist" >
+    <id column="MOBILE" property="mobile" jdbcType="VARCHAR" />
+    <result column="BATCH_ID" property="batchId" jdbcType="VARCHAR" />
+    <result column="IMPORT_TIME" property="importTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    MOBILE, BATCH_ID, IMPORT_TIME
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_mobile_blacklist
+    where MOBILE = #{mobile,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_mobile_blacklist
+    where MOBILE = #{mobile,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TMobileBlacklist" >
+    insert into t_mobile_blacklist (MOBILE, BATCH_ID, IMPORT_TIME
+      )
+    values (#{mobile,jdbcType=VARCHAR}, #{batchId,jdbcType=VARCHAR}, #{importTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TMobileBlacklist" >
+    insert into t_mobile_blacklist
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="mobile != null" >
+        MOBILE,
+      </if>
+      <if test="batchId != null" >
+        BATCH_ID,
+      </if>
+      <if test="importTime != null" >
+        IMPORT_TIME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="mobile != null" >
+        #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="batchId != null" >
+        #{batchId,jdbcType=VARCHAR},
+      </if>
+      <if test="importTime != null" >
+        #{importTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TMobileBlacklist" >
+    update t_mobile_blacklist
+    <set >
+      <if test="batchId != null" >
+        BATCH_ID = #{batchId,jdbcType=VARCHAR},
+      </if>
+      <if test="importTime != null" >
+        IMPORT_TIME = #{importTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where MOBILE = #{mobile,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TMobileBlacklist" >
+    update t_mobile_blacklist
+    set BATCH_ID = #{batchId,jdbcType=VARCHAR},
+      IMPORT_TIME = #{importTime,jdbcType=TIMESTAMP}
+    where MOBILE = #{mobile,jdbcType=VARCHAR}
+  </update>
+</mapper>

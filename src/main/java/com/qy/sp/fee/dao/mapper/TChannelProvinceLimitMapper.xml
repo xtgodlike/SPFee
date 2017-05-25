@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.ChannelProvinceLimitDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TChannelProvinceLimit" >
+    <id column="CHANNEL_ID" property="channelId" jdbcType="VARCHAR" />
+    <id column="PIPLE_ID" property="pipleId" jdbcType="VARCHAR" />
+    <result column="PROVINCE_ID" property="provinceId" jdbcType="INTEGER" />
+    <result column="TRADE_DAY" property="tradeDay" jdbcType="INTEGER" />
+    <result column="TRADE_MONTH" property="tradeMonth" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    CHANNEL_ID, PIPLE_ID, PROVINCE_ID,TRADE_DAY,TRADE_MONTH
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.qy.sp.fee.dto.TChannelProvinceLimit" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_channel_province_limit
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+      and PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+      and PROVINCE_ID = #{provinceId,jdbcType=INTEGER}
+  </select>
+</mapper>

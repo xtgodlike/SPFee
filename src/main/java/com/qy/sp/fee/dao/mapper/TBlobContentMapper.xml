@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.BlobContentDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TBlobContent" >
+    <id column="FILE_ID" property="fileId" jdbcType="VARCHAR" />
+    <result column="FILENAME" property="filename" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.qy.sp.fee.dto.TBlobContent" extends="BaseResultMap" >
+    <result column="FILE_CONTENT" property="fileContent" jdbcType="LONGVARBINARY" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    FILE_ID, FILENAME
+  </sql>
+  <sql id="Blob_Column_List" >
+    FILE_CONTENT
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_blob_content
+    where FILE_ID = #{fileId,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByName" resultMap="ResultMapWithBLOBs" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_blob_content
+    where FILENAME = #{name,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_blob_content
+    where FILE_ID = #{fileId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TBlobContent" >
+    insert into t_blob_content (FILE_ID, FILENAME, FILE_CONTENT
+      )
+    values (#{fileId,jdbcType=VARCHAR}, #{filename,jdbcType=VARCHAR}, #{fileContent,jdbcType=LONGVARBINARY}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TBlobContent" >
+    insert into t_blob_content
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="fileId != null" >
+        FILE_ID,
+      </if>
+      <if test="filename != null" >
+        FILENAME,
+      </if>
+      <if test="fileContent != null" >
+        FILE_CONTENT,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="fileId != null" >
+        #{fileId,jdbcType=VARCHAR},
+      </if>
+      <if test="filename != null" >
+        #{filename,jdbcType=VARCHAR},
+      </if>
+      <if test="fileContent != null" >
+        #{fileContent,jdbcType=LONGVARBINARY},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TBlobContent" >
+    update t_blob_content
+    <set >
+      <if test="filename != null" >
+        FILENAME = #{filename,jdbcType=VARCHAR},
+      </if>
+      <if test="fileContent != null" >
+        FILE_CONTENT = #{fileContent,jdbcType=LONGVARBINARY},
+      </if>
+    </set>
+    where FILE_ID = #{fileId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.qy.sp.fee.dto.TBlobContent" >
+    update t_blob_content
+    set FILENAME = #{filename,jdbcType=VARCHAR},
+      FILE_CONTENT = #{fileContent,jdbcType=LONGVARBINARY}
+    where FILE_ID = #{fileId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TBlobContent" >
+    update t_blob_content
+    set FILENAME = #{filename,jdbcType=VARCHAR}
+    where FILE_ID = #{fileId,jdbcType=VARCHAR}
+  </update>
+</mapper>

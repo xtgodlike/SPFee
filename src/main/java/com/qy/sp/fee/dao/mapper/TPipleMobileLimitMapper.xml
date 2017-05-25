@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.PipleMobileLimitDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TPipleMobileLimit" >
+    <id column="PIPLE_ID" property="pipleId" jdbcType="VARCHAR" />
+    <result column="TRADE_DAY" property="tradeDay" jdbcType="INTEGER" />
+    <result column="TRADE_MONTH" property="tradeMonth" jdbcType="INTEGER" />
+    <result column="SUCCESS_NUM_DAY" property="tradeDayCount" jdbcType="INTEGER" />
+    <result column="SUCCESS_NUM_MONTH" property="tradeMonthCount" jdbcType="INTEGER" />
+    <result column="REQ_NUM_DAY" property="requestDayCount" jdbcType="INTEGER" />
+    <result column="REQ_NUM_MONTH" property="requestMonthCount" jdbcType="INTEGER" />
+    <result column="LIMIT_TYPE" property="limitType" jdbcType="INTEGER" />
+    <result column="PIPLE_DAY" property="pipleTradeDay" jdbcType="INTEGER" />
+    <result column="PIPLE_MONTH" property="pipleTradeMonth" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    PIPLE_ID,TRADE_DAY,TRADE_MONTH,SUCCESS_NUM_DAY,SUCCESS_NUM_MONTH,REQ_NUM_DAY,REQ_NUM_MONTH,LIMIT_TYPE,PIPLE_DAY,PIPLE_MONTH
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.qy.sp.fee.dto.TPipleMobileLimit" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_piple_mobile_limit
+    where PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  </select>
+</mapper>

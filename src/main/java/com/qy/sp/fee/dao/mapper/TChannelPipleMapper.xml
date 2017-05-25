@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.ChannelPipleDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TChannelPiple" >
+    <id column="CHANNEL_ID" property="channelId" jdbcType="VARCHAR" />
+    <id column="PIPLE_ID" property="pipleId" jdbcType="VARCHAR" />
+    <result column="NOTIFY_URL" property="notifyUrl" jdbcType="VARCHAR" />
+    <result column="VOLT" property="volt" jdbcType="INTEGER" />
+    <result column="TRADE_DAY" property="tradeDay" jdbcType="INTEGER" />
+    <result column="TRADE_MONTH" property="tradeMonth" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    CHANNEL_ID, PIPLE_ID, NOTIFY_URL, VOLT,TRADE_DAY,TRADE_MONTH
+  </sql>
+  <select id="getListByPipleId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    t1.CHANNEL_ID as CHANNEL_ID, t1.PIPLE_ID as PIPLE_ID, t1.NOTIFY_URL as NOTIFY_URL, t1.VOLT as VOLT 
+    from t_channel_piple t1
+    where  t1.PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.qy.sp.fee.dto.TChannelPipleKey" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_channel_piple
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+      and PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="com.qy.sp.fee.dto.TChannelPipleKey" >
+    delete from t_channel_piple
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+      and PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TChannelPiple" >
+    insert into t_channel_piple (CHANNEL_ID, PIPLE_ID, NOTIFY_URL, VOLT
+      )
+    values (#{channelId,jdbcType=VARCHAR}, #{pipleId,jdbcType=VARCHAR}, #{notifyUrl,jdbcType=VARCHAR}, #{volt,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TChannelPiple" >
+    insert into t_channel_piple
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="channelId != null" >
+        CHANNEL_ID,
+      </if>
+      <if test="pipleId != null" >
+        PIPLE_ID,
+      </if>
+      <if test="notifyUrl != null" >
+        NOTIFY_URL,
+      </if>
+      <if test="volt != null" >
+        VOLT,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="channelId != null" >
+        #{channelId,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleId != null" >
+        #{pipleId,jdbcType=VARCHAR},
+      </if>
+      <if test="notifyUrl != null" >
+        #{notifyUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="volt != null" >
+        #{volt,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TChannelPiple" >
+    update t_channel_piple
+    <set >
+      <if test="notifyUrl != null" >
+        NOTIFY_URL = #{notifyUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="volt != null" >
+        VOLT = #{volt,jdbcType=INTEGER},
+      </if>
+    </set>
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+      and PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TChannelPiple" >
+    update t_channel_piple
+    set NOTIFY_URL = #{notifyUrl,jdbcType=VARCHAR},VOLT = #{volt,jdbcType=INTEGER}
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+      and PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  </update>
+</mapper>

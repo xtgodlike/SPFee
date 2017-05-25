@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.SdkAppDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TSdkApp" >
+    <id column="APP_ID" property="appId" jdbcType="VARCHAR" />
+    <result column="CP_ID" property="cpId" jdbcType="VARCHAR" />
+    <result column="APP_NAME" property="appName" jdbcType="VARCHAR" />
+    <result column="APP_PACKETNAME" property="appPacketname" jdbcType="VARCHAR" />
+    <result column="APP_SIGIN" property="appSigin" jdbcType="VARCHAR" />
+    <result column="APP_SIZE" property="appSize" jdbcType="LONGVARCHAR" />
+    <result column="APP_STATUS" property="appStatus" jdbcType="INTEGER" />
+    <result column="APK_ID" property="apkId" jdbcType="VARCHAR" />
+    <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="MOD_TIME" property="modTime" jdbcType="TIMESTAMP" />
+    <result column="CP_NAME" property="cpName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    APP_ID, CP_ID, APP_NAME, APP_PACKETNAME, APP_SIGIN,APP_SIZE, APP_STATUS, APK_ID, CREATE_TIME, 
+    MOD_TIME
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_sdk_app
+    where APP_ID = #{appId,jdbcType=VARCHAR}
+  </select>
+</mapper>

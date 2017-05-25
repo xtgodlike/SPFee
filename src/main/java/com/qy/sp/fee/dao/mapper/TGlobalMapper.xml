@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.GlobalDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TGlobal" >
+    <id column="GLOBAL_ID" property="globalId" jdbcType="INTEGER" />
+    <result column="GLOBAL_NAME" property="globalName" jdbcType="VARCHAR" />
+    <result column="GLOBAL_VALUE" property="globalValue" jdbcType="VARCHAR" />
+    <result column="COMMET_DESC" property="commetDesc" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    GLOBAL_ID, GLOBAL_NAME, GLOBAL_VALUE, COMMET_DESC
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_global
+    where GLOBAL_ID = #{globalId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_global
+    where GLOBAL_ID = #{globalId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TGlobal" >
+    insert into t_global (GLOBAL_ID, GLOBAL_NAME, GLOBAL_VALUE, 
+      COMMET_DESC)
+    values (#{globalId,jdbcType=INTEGER}, #{globalName,jdbcType=VARCHAR}, #{globalValue,jdbcType=VARCHAR}, 
+      #{commetDesc,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TGlobal" >
+    insert into t_global
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="globalId != null" >
+        GLOBAL_ID,
+      </if>
+      <if test="globalName != null" >
+        GLOBAL_NAME,
+      </if>
+      <if test="globalValue != null" >
+        GLOBAL_VALUE,
+      </if>
+      <if test="commetDesc != null" >
+        COMMET_DESC,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="globalId != null" >
+        #{globalId,jdbcType=INTEGER},
+      </if>
+      <if test="globalName != null" >
+        #{globalName,jdbcType=VARCHAR},
+      </if>
+      <if test="globalValue != null" >
+        #{globalValue,jdbcType=VARCHAR},
+      </if>
+      <if test="commetDesc != null" >
+        #{commetDesc,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TGlobal" >
+    update t_global
+    <set >
+      <if test="globalName != null" >
+        GLOBAL_NAME = #{globalName,jdbcType=VARCHAR},
+      </if>
+      <if test="globalValue != null" >
+        GLOBAL_VALUE = #{globalValue,jdbcType=VARCHAR},
+      </if>
+      <if test="commetDesc != null" >
+        COMMET_DESC = #{commetDesc,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where GLOBAL_ID = #{globalId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TGlobal" >
+    update t_global
+    set GLOBAL_NAME = #{globalName,jdbcType=VARCHAR},
+      GLOBAL_VALUE = #{globalValue,jdbcType=VARCHAR},
+      COMMET_DESC = #{commetDesc,jdbcType=VARCHAR}
+    where GLOBAL_ID = #{globalId,jdbcType=INTEGER}
+  </update>
+</mapper>

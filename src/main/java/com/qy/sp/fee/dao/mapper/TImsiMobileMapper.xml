@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.ImsiMobileDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TImsiMobile" >
+    <id column="IMSI" property="imsi" jdbcType="VARCHAR" />
+    <result column="MOBILE" property="mobile" jdbcType="VARCHAR" />
+    <result column="IMPORTTIME" property="importtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    IMSI, MOBILE, IMPORTTIME
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_imsi_mobile
+    where IMSI = #{imsi,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_imsi_mobile
+    where IMSI = #{imsi,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TImsiMobile" >
+    insert into t_imsi_mobile (IMSI, MOBILE, IMPORTTIME)
+    values (#{imsi,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR}, #{importtime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TImsiMobile" >
+    insert into t_imsi_mobile
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="imsi != null" >
+        IMSI,
+      </if>
+      <if test="mobile != null" >
+        MOBILE,
+      </if>
+      <if test="importtime != null" >
+        IMPORTTIME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="imsi != null" >
+        #{imsi,jdbcType=VARCHAR},
+      </if>
+      <if test="mobile != null" >
+        #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="importtime != null" >
+        #{importtime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TImsiMobile" >
+    update t_imsi_mobile
+    <set >
+      <if test="mobile != null" >
+        MOBILE = #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="importtime != null" >
+        IMPORTTIME = #{importtime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where IMSI = #{imsi,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TImsiMobile" >
+    update t_imsi_mobile
+    set MOBILE = #{mobile,jdbcType=VARCHAR},
+      IMPORTTIME = #{importtime,jdbcType=TIMESTAMP}
+    where IMSI = #{imsi,jdbcType=VARCHAR}
+  </update>
+</mapper>

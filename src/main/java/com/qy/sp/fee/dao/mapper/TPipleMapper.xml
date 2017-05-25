@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.PipleDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TPiple" >
+    <id column="PIPLE_ID" property="pipleId" jdbcType="VARCHAR" />
+    <result column="PIPLE_NAME" property="pipleName" jdbcType="VARCHAR" />
+    <result column="SUPPLIER_ID" property="supplierId" jdbcType="VARCHAR" />
+    <result column="OP_STATUS" property="opStatus" jdbcType="INTEGER" />
+    <result column="CONTRACT_ID" property="contractId" jdbcType="VARCHAR" />
+    <result column="PIPLE_URL_A" property="pipleUrlA" jdbcType="VARCHAR" />
+    <result column="PIPLE_URL_B" property="pipleUrlB" jdbcType="VARCHAR" />
+    <result column="NOTIFY_URL_A" property="notifyUrlA" jdbcType="VARCHAR" />
+    <result column="NOTIFY_URL_B" property="notifyUrlB" jdbcType="VARCHAR" />
+    <result column="CHANNEL_URL_A" property="channelUrlA" jdbcType="VARCHAR" />
+    <result column="CHANNEL_URL_B" property="channelUrlB" jdbcType="VARCHAR" />
+    <result column="PIPLE_DOC" property="pipleDoc" jdbcType="VARCHAR" />
+    <result column="CHANNEL_DOC" property="channelDoc" jdbcType="VARCHAR" />
+    <result column="PIPLE_AUTH_A" property="pipleAuthA" jdbcType="VARCHAR" />
+    <result column="PIPLE_AUTH_B" property="pipleAuthB" jdbcType="VARCHAR" />
+    <result column="PIPLE_AUTH_C" property="pipleAuthC" jdbcType="VARCHAR" />
+    <result column="PIPLE_AUTH_D" property="pipleAuthD" jdbcType="VARCHAR" />
+    <result column="HOST_ID" property="hostId" jdbcType="INTEGER" />
+    <result column="PLUGIN_ID" property="pluginFile" jdbcType="VARCHAR" />
+    <result column="PLUGIN_VERSION" property="pluginVersion" jdbcType="VARCHAR" />
+    <result column="TEST_PLUGIN_ID" property="testPluginId" jdbcType="VARCHAR" />
+    <result column="CODE_TYPE" property="codeType" jdbcType="INTEGER" />
+    <result column="PIPLE_TYPE" property="pipleType" jdbcType="INTEGER" />
+    <result column="CALC_TYPE" property="caclType" jdbcType="INTEGER" />
+    <result column="PIPLE_NUMBER" property="pipleNumber" jdbcType="VARCHAR" />
+    <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="MOD_TIME" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <resultMap id="TPipleApply" type="com.qy.sp.fee.dto.TPipleApply" extends="BaseResultMap">
+ 	 <result property="priority" column="PRIORITY" jdbcType="INTEGER" />
+ 	 <result property="productId" column="PRODUCT_ID" jdbcType="VARCHAR" />
+</resultMap>
+   <sql id="Base_Column_List" >
+    PIPLE_ID, PIPLE_NAME, SUPPLIER_ID, OP_STATUS, CONTRACT_ID, PIPLE_URL_A, PIPLE_URL_B, 
+    NOTIFY_URL_A, NOTIFY_URL_B, CHANNEL_URL_A, CHANNEL_URL_B, PIPLE_DOC, CHANNEL_DOC, 
+    PIPLE_AUTH_A, PIPLE_AUTH_B, PIPLE_AUTH_C, PIPLE_AUTH_D, HOST_ID,PLUGIN_ID,PLUGIN_VERSION,TEST_PLUGIN_ID,
+    CODE_TYPE,PIPLE_TYPE,CALC_TYPE,PIPLE_NUMBER,CREATE_TIME,MOD_TIME,SHOW_STATUS
+  </sql>  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_piple
+    where PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  </select>
+    <select id="selectPipleByFilterKey" resultMap="TPipleApply" parameterType="com.qy.sp.fee.dto.TPipleFilterKey" >
+   	SELECT t3.*,t1.PRIORITY,t2.product_id FROM(
+	SELECT piple_id,PRIORITY FROM t_piple_province WHERE province_id= #{provinceId,jdbcType=VARCHAR} AND OP_STATUS=1
+	) t1 
+	INNER  JOIN (
+	SELECT piple_id,product_id  FROM t_piple_product WHERE 1=1 
+		<if test="productId != null" >
+		and product_id= #{productId,jdbcType=VARCHAR}
+		</if>
+		 AND OP_STATUS=1
+	) t2 ON t1.piple_id = t2.piple_id
+	INNER  JOIN (
+	SELECT * FROM t_piple t WHERE t.HOST_ID =#{hostId,jdbcType=VARCHAR} and t.OP_STATUS=1 and t.PIPLE_TYPE != 10009 and t.CODE_TYPE= 30001
+	<if test="pluginType != null" >
+		and t.PLUGIN_TYPE= #{pluginType,jdbcType=VARCHAR}
+		</if>
+	) t3 ON t1.piple_id = t3.piple_id 
+	INNER  JOIN (
+	SELECT PIPLE_ID FROM t_channel_piple t WHERE t.channel_Id=#{channelId,jdbcType=VARCHAR} AND OP_STATUS=1
+	) t4 ON t1.piple_id = t4.piple_id ORDER BY t1.PRIORITY DESC
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_piple
+    where PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TPiple" >
+    insert into t_piple (PIPLE_ID, PIPLE_NAME, SUPPLIER_ID, 
+      OP_STATUS, CONTRACT_ID, PIPLE_URL_A, 
+      PIPLE_URL_B, NOTIFY_URL_A, NOTIFY_URL_B, 
+      CHANNEL_URL_A, CHANNEL_URL_B, PIPLE_DOC, 
+      CHANNEL_DOC, PIPLE_AUTH_A, PIPLE_AUTH_B, 
+      PIPLE_AUTH_C, PIPLE_AUTH_D, HOST_ID)
+    values (#{pipleId,jdbcType=VARCHAR}, #{pipleName,jdbcType=VARCHAR}, #{supplierId,jdbcType=VARCHAR}, 
+      #{opStatus,jdbcType=INTEGER}, #{contractId,jdbcType=VARCHAR}, #{pipleUrlA,jdbcType=VARCHAR}, 
+      #{pipleUrlB,jdbcType=VARCHAR}, #{notifyUrlA,jdbcType=VARCHAR}, #{notifyUrlB,jdbcType=VARCHAR}, 
+      #{channelUrlA,jdbcType=VARCHAR}, #{channelUrlB,jdbcType=VARCHAR}, #{pipleDoc,jdbcType=VARCHAR}, 
+      #{channelDoc,jdbcType=VARCHAR}, #{pipleAuthA,jdbcType=VARCHAR}, #{pipleAuthB,jdbcType=VARCHAR}, 
+      #{pipleAuthC,jdbcType=VARCHAR}, #{pipleAuthD,jdbcType=VARCHAR}, #{hostId,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TPiple" >
+    insert into t_piple
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="pipleId != null" >
+        PIPLE_ID,
+      </if>
+      <if test="pipleName != null" >
+        PIPLE_NAME,
+      </if>
+      <if test="supplierId != null" >
+        SUPPLIER_ID,
+      </if>
+      <if test="opStatus != null" >
+        OP_STATUS,
+      </if>
+      <if test="contractId != null" >
+        CONTRACT_ID,
+      </if>
+      <if test="pipleUrlA != null" >
+        PIPLE_URL_A,
+      </if>
+      <if test="pipleUrlB != null" >
+        PIPLE_URL_B,
+      </if>
+      <if test="notifyUrlA != null" >
+        NOTIFY_URL_A,
+      </if>
+      <if test="notifyUrlB != null" >
+        NOTIFY_URL_B,
+      </if>
+      <if test="channelUrlA != null" >
+        CHANNEL_URL_A,
+      </if>
+      <if test="channelUrlB != null" >
+        CHANNEL_URL_B,
+      </if>
+      <if test="pipleDoc != null" >
+        PIPLE_DOC,
+      </if>
+      <if test="channelDoc != null" >
+        CHANNEL_DOC,
+      </if>
+      <if test="pipleAuthA != null" >
+        PIPLE_AUTH_A,
+      </if>
+      <if test="pipleAuthB != null" >
+        PIPLE_AUTH_B,
+      </if>
+      <if test="pipleAuthC != null" >
+        PIPLE_AUTH_C,
+      </if>
+      <if test="pipleAuthD != null" >
+        PIPLE_AUTH_D,
+      </if>
+      <if test="hostId != null" >
+        HOST_ID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="pipleId != null" >
+        #{pipleId,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleName != null" >
+        #{pipleName,jdbcType=VARCHAR},
+      </if>
+      <if test="supplierId != null" >
+        #{supplierId,jdbcType=VARCHAR},
+      </if>
+      <if test="opStatus != null" >
+        #{opStatus,jdbcType=INTEGER},
+      </if>
+      <if test="contractId != null" >
+        #{contractId,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleUrlA != null" >
+        #{pipleUrlA,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleUrlB != null" >
+        #{pipleUrlB,jdbcType=VARCHAR},
+      </if>
+      <if test="notifyUrlA != null" >
+        #{notifyUrlA,jdbcType=VARCHAR},
+      </if>
+      <if test="notifyUrlB != null" >
+        #{notifyUrlB,jdbcType=VARCHAR},
+      </if>
+      <if test="channelUrlA != null" >
+        #{channelUrlA,jdbcType=VARCHAR},
+      </if>
+      <if test="channelUrlB != null" >
+        #{channelUrlB,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleDoc != null" >
+        #{pipleDoc,jdbcType=VARCHAR},
+      </if>
+      <if test="channelDoc != null" >
+        #{channelDoc,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleAuthA != null" >
+        #{pipleAuthA,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleAuthB != null" >
+        #{pipleAuthB,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleAuthC != null" >
+        #{pipleAuthC,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleAuthD != null" >
+        #{pipleAuthD,jdbcType=VARCHAR},
+      </if>
+      <if test="hostId != null" >
+        #{hostId,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TPiple" >
+    update t_piple
+    <set >
+      <if test="pipleName != null" >
+        PIPLE_NAME = #{pipleName,jdbcType=VARCHAR},
+      </if>
+      <if test="supplierId != null" >
+        SUPPLIER_ID = #{supplierId,jdbcType=VARCHAR},
+      </if>
+      <if test="opStatus != null" >
+        OP_STATUS = #{opStatus,jdbcType=INTEGER},
+      </if>
+      <if test="contractId != null" >
+        CONTRACT_ID = #{contractId,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleUrlA != null" >
+        PIPLE_URL_A = #{pipleUrlA,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleUrlB != null" >
+        PIPLE_URL_B = #{pipleUrlB,jdbcType=VARCHAR},
+      </if>
+      <if test="notifyUrlA != null" >
+        NOTIFY_URL_A = #{notifyUrlA,jdbcType=VARCHAR},
+      </if>
+      <if test="notifyUrlB != null" >
+        NOTIFY_URL_B = #{notifyUrlB,jdbcType=VARCHAR},
+      </if>
+      <if test="channelUrlA != null" >
+        CHANNEL_URL_A = #{channelUrlA,jdbcType=VARCHAR},
+      </if>
+      <if test="channelUrlB != null" >
+        CHANNEL_URL_B = #{channelUrlB,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleDoc != null" >
+        PIPLE_DOC = #{pipleDoc,jdbcType=VARCHAR},
+      </if>
+      <if test="channelDoc != null" >
+        CHANNEL_DOC = #{channelDoc,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleAuthA != null" >
+        PIPLE_AUTH_A = #{pipleAuthA,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleAuthB != null" >
+        PIPLE_AUTH_B = #{pipleAuthB,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleAuthC != null" >
+        PIPLE_AUTH_C = #{pipleAuthC,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleAuthD != null" >
+        PIPLE_AUTH_D = #{pipleAuthD,jdbcType=VARCHAR},
+      </if>
+      <if test="hostId != null" >
+        HOST_ID = #{hostId,jdbcType=INTEGER},
+      </if>
+       <if test="pluginFile != null" >
+        PLUGIN_ID = #{pluginFile,jdbcType=INTEGER},
+      </if>
+       <if test="pluginVersion != null" >
+        PLUGIN_VERSION = #{pluginVersion,jdbcType=INTEGER},
+      </if>
+    </set>
+    where PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TPiple" >
+    update t_piple
+    set PIPLE_NAME = #{pipleName,jdbcType=VARCHAR},
+      SUPPLIER_ID = #{supplierId,jdbcType=VARCHAR},
+      OP_STATUS = #{opStatus,jdbcType=INTEGER},
+      CONTRACT_ID = #{contractId,jdbcType=VARCHAR},
+      PIPLE_URL_A = #{pipleUrlA,jdbcType=VARCHAR},
+      PIPLE_URL_B = #{pipleUrlB,jdbcType=VARCHAR},
+      NOTIFY_URL_A = #{notifyUrlA,jdbcType=VARCHAR},
+      NOTIFY_URL_B = #{notifyUrlB,jdbcType=VARCHAR},
+      CHANNEL_URL_A = #{channelUrlA,jdbcType=VARCHAR},
+      CHANNEL_URL_B = #{channelUrlB,jdbcType=VARCHAR},
+      PIPLE_DOC = #{pipleDoc,jdbcType=VARCHAR},
+      CHANNEL_DOC = #{channelDoc,jdbcType=VARCHAR},
+      PIPLE_AUTH_A = #{pipleAuthA,jdbcType=VARCHAR},
+      PIPLE_AUTH_B = #{pipleAuthB,jdbcType=VARCHAR},
+      PIPLE_AUTH_C = #{pipleAuthC,jdbcType=VARCHAR},
+      PIPLE_AUTH_D = #{pipleAuthD,jdbcType=VARCHAR},
+      HOST_ID = #{hostId,jdbcType=INTEGER}
+    where PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  </update>
+</mapper>

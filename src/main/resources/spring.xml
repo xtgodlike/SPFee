@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task" 
+	xmlns:mongo="http://www.springframework.org/schema/data/mongo" 
+	xsi:schemaLocation="
+	          http://www.springframework.org/schema/beans 
+	          http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		      http://www.springframework.org/schema/aop 
+		      http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+		      http://www.springframework.org/schema/context 
+		      http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		      http://www.springframework.org/schema/tx 
+		      http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+		      http://www.springframework.org/schema/task
+			  http://www.springframework.org/schema/task/spring-task-3.1.xsd
+			  http://www.springframework.org/schema/data/mongo       
+        	  http://www.springframework.org/schema/data/mongo/spring-mongo-1.2.xsd
+			  ">
+
+	<context:annotation-config />
+	<context:component-scan base-package="com.qy.sp.fee">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<!-- 加载数据库配置文件 -->
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+        <property name="locations">  
+            <list>  
+                <value>classpath:redis.properties</value><!-- 引入redis配置文件 -->  
+                <value>classpath:jdbc.properties</value><!-- 定义spring-jdbc配置信息路径 -->  
+                <value>classpath:mongodb.properties</value><!-- 定义Mongodb-jdbc配置信息路径 -->  
+            </list>  
+        </property>  
+    </bean>  
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName"><value>${jdbc.base.driverClassName}</value></property>
+        <property name="url"> <value>${jdbc.base.url}</value></property>
+        <property name="username"> <value>${jdbc.base.username}</value></property>
+        <property name="password"><value>${jdbc.base.password}</value></property>
+        <property name="maxActive"><value>${jdbc.base.maxActive}</value></property>
+        <property name="maxWait"><value>${jdbc.base.maxWait}</value></property>
+        <property name="maxIdle"><value>${jdbc.base.maxIdle}</value></property>
+        <property name="initialSize"><value>${jdbc.base.initSize}</value></property>
+        <property name="removeAbandoned"><value>true</value></property>
+		<property name="testWhileIdle"><value>true</value></property>
+		<property name="testOnBorrow"><value>false</value></property>
+		<property name="validationQuery"><value>SELECT 1 FROM DUAL</value></property>
+    </bean>
+
+	<!--事务相关控制 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<!--把事务控制在Service层 -->   
+	<aop:config>   
+	<aop:pointcut id="fooServiceMethods"    expression="execution(public * com.qy.sp.fee.service.*.*(..))"/>    
+	<aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceMethods"/>    
+	</aop:config>   
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="add*" propagation="REQUIRED" read-only="false"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="delete*" propagation="REQUIRED" read-only="false"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="modify*" propagation="REQUIRED" read-only="false"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="update*" propagation="REQUIRED" read-only="false"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="save*" propagation="REQUIRED" read-only="false"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="confirm*" propagation="REQUIRED" read-only="false"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="find*" read-only="true" />
+			<tx:method name="select*" read-only="true" />
+			<tx:method name="stat*" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- mybatis config -->    
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">         
+		<property name="dataSource" ref="dataSource" />         
+		<!-- 自动扫描dto目录, 省掉Configuration.xml里的手工配置 -->        
+		<property name="typeAliasesPackage" value="com.qy.sp.fee.dto" />         
+		<!-- 显式指定Mapper文件位置 -->        
+		<property name="mapperLocations" value="classpath:/com/qy/sp/fee/dao/**/*Mapper.xml" />  
+	</bean>     
+	<!-- 扫描basePackage下所有以@MyBatisRepository标识的 接口-->    
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">         
+		<property name="basePackage" value="com.qy.sp.fee.dao" />   
+		<property name="annotationClass" value="com.qy.sp.fee.dao.MyBatisRepository"/>     
+	</bean> 	
+	<task:annotation-driven/> 
+	
+    <bean id="redisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">  
+        <property name="maxIdle"><value>${redis.maxIdle}</value></property>  
+        <property name="maxActive" ><value>${redis.maxActive}</value></property>  
+        <property name="maxWait"><value>${redis.maxWait}</value></property>  
+    </bean>  
+      
+    <bean id="redisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+     p:host-name="${redis.host}" p:port="${redis.port}" p:password="${redis.password}"  p:pool-config-ref="redisPoolConfig"
+    />
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate" p:connection-factory-ref="redisConnectionFactory">  
+    </bean> 
+            
+    <mongo:mongo host="${mongodb.host}" port="${mongodb.port}"/>  
+    <bean id="authMongodbFactory" class="com.qy.sp.fee.dao.impl.mongodb.AuthMongoDbFactory">
+	    <constructor-arg name="mongo" ref="mongo"/>  
+	    <constructor-arg name="databaseName" value="${mongodb.dbname}"/>  
+	    <constructor-arg name="authDataBaseName" value="${mongodb.userdb}"/>  
+	    <constructor-arg name="username" value="${mongodb.username}"/>    
+	    <constructor-arg name="password" value="${mongodb.password}"/>    
+    </bean>
+    
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">     
+        <constructor-arg ref="authMongodbFactory"/>     
+     </bean>     
+	</beans>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.SdkTaskDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TSdkTask" >
+    <id column="TASK_ID" property="taskId" jdbcType="VARCHAR" />
+    <result column="TASK_NAME" property="taskName" jdbcType="VARCHAR" />
+    <result column="TASK_EXECUTE" property="taskExecute" jdbcType="INTEGER" />
+    <result column="TASK_VERSION" property="version" jdbcType="VARCHAR" />
+    <result column="TASK_DESC" property="taskDescription" jdbcType="VARCHAR" />
+    <result column="TASK_PLUGIN" property="pluginFile" jdbcType="VARCHAR" />
+    <result column="TASK_STATUS" property="status" jdbcType="INTEGER" />
+    <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="MOD_TIME" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    TASK_ID, TASK_NAME, TASK_VERSION, TASK_DESC, TASK_PLUGIN, TASK_STATUS,CREATE_TIME,MOD_TIME
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_sdktask
+    where TASK_ID = #{taskId,jdbcType=VARCHAR}
+  </select>
+  <select id="selectTasksByTaskQueryKey" resultMap="BaseResultMap" parameterType="com.qy.sp.fee.dto.TSdkTaskQueryKey" >
+    select t1.TASK_ID, t1.TASK_EXECUTE,TASK_NAME, TASK_VERSION, TASK_DESC, TASK_PLUGIN, TASK_STATUS,CREATE_TIME,MOD_TIME from 
+     (
+      <if test="phoneId != null" >
+      select * from t_sdktask_phone where phone_id = #{phoneId,jdbcType=VARCHAR} and TASK_STEP = #{stepId,jdbcType=VARCHAR} AND TASK_EXECUTE=1
+      </if>
+      <if test="phoneId == null and (channelId != null or appId != null or provinceId != null)" >
+     		select * from t_sdktask_cross where TASK_STEP = #{stepId,jdbcType=VARCHAR} AND TASK_EXECUTE=1
+		<if test="channelId != null ">
+			and ( channel_id = #{channelId,jdbcType=VARCHAR} or channel_id = '')
+		</if>
+		<if test="appId != null ">
+			and ( app_id = #{appId,jdbcType=VARCHAR} or app_id = '')
+		</if>
+		<if test="provinceId != null ">
+			and ( province_id = #{provinceId,jdbcType=VARCHAR} or province_id = '')
+		</if>
+      </if>
+      <if test="phoneId == null and channelId == null and appId == null and provinceId == null" >
+      select * from t_sdktask_global where TASK_STEP = #{stepId,jdbcType=VARCHAR} AND TASK_EXECUTE=1
+      </if>
+    ) t1 right join t_sdktask t2 on t1.TASK_ID = t2.TASK_ID and t2.TASK_STATUS = 1
+  </select>
+  <delete id="deleteTasksByTaskQueryKey"  parameterType="com.qy.sp.fee.dto.TSdkTaskQueryKey" >
+      <if test="phoneId != null" >
+      delete from t_sdktask_phone where phone_id = #{phoneId,jdbcType=VARCHAR} AND task_id = #{taskId,jdbcType=VARCHAR}
+      </if>
+       <if test="channelId != null" >
+      delete from t_sdktask_channel where channel_id = #{channelId,jdbcType=VARCHAR} AND task_id = #{taskId,jdbcType=VARCHAR}
+      </if>
+      <if test="appId != null" >
+      delete from t_sdktask_app where app_id = #{appId,jdbcType=VARCHAR} AND task_id = #{taskId,jdbcType=VARCHAR}
+      </if>
+      <if test="provinceId != null" >
+      delete from t_sdktask_province where privince_id = #{provinceId,jdbcType=VARCHAR} AND task_id = #{taskId,jdbcType=VARCHAR}
+      </if>
+  </delete>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_sdktask
+    where TASK_ID = #{taskId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TSdkTask" >
+    insert into t_sdktask (TASK_ID, TASK_NAME, TASK_VERSION, TASK_DESC, TASK_PLUGIN, TASK_STATUS,CREATE_TIME,MOD_TIME)
+    values (#{taskId,jdbcType=VARCHAR}, #{taskName,jdbcType=VARCHAR}, #{version,jdbcType=VARCHAR}, #{taskDescription,jdbcType=VARCHAR}, #{pluginFile,jdbcType=VARCHAR},  
+     #{status,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TSdkTask" >
+    update t_sdktask
+    set
+      TASK_NAME = #{taskName,jdbcType=VARCHAR},
+      TASK_VERSION = #{version,jdbcType=VARCHAR},
+      TASK_DESC = #{taskDescription,jdbcType=VARCHAR},
+      TASK_PLUGIN = #{pluginFile,jdbcType=VARCHAR},
+      TASK_STATUS = #{status,jdbcType=VARCHAR},
+      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      MOD_TIME = #{modifyTime,jdbcType=TIMESTAMP}
+    where TASK_ID = #{taskId,jdbcType=VARCHAR}
+  </update>
+</mapper>

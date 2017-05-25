@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.OrderExtDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TOrderExt" >
+    <id column="ORDER_ID" property="orderId" jdbcType="VARCHAR" />
+    <id column="EXT_KEY" property="extKey" jdbcType="VARCHAR" />
+    <result column="EXT_VALUE" property="extValue" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ORDER_ID, EXT_KEY, EXT_VALUE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.qy.sp.fee.dto.TOrderExtKey" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_order_ext
+    where ORDER_ID = #{orderId,jdbcType=VARCHAR}
+      and EXT_KEY = #{extKey,jdbcType=VARCHAR}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="com.qy.sp.fee.dto.TOrderExtKey" >
+    delete from t_order_ext
+    where ORDER_ID = #{orderId,jdbcType=VARCHAR}
+      and EXT_KEY = #{extKey,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TOrderExt" >
+    insert into t_order_ext (ORDER_ID, EXT_KEY, EXT_VALUE
+      )
+    values (#{orderId,jdbcType=VARCHAR}, #{extKey,jdbcType=VARCHAR}, #{extValue,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TOrderExt" >
+    insert into t_order_ext
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="orderId != null" >
+        ORDER_ID,
+      </if>
+      <if test="extKey != null" >
+        EXT_KEY,
+      </if>
+      <if test="extValue != null" >
+        EXT_VALUE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="orderId != null" >
+        #{orderId,jdbcType=VARCHAR},
+      </if>
+      <if test="extKey != null" >
+        #{extKey,jdbcType=VARCHAR},
+      </if>
+      <if test="extValue != null" >
+        #{extValue,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TOrderExt" >
+    update t_order_ext
+    <set >
+      <if test="extValue != null" >
+        EXT_VALUE = #{extValue,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ORDER_ID = #{orderId,jdbcType=VARCHAR}
+      and EXT_KEY = #{extKey,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TOrderExt" >
+    update t_order_ext
+    set EXT_VALUE = #{extValue,jdbcType=VARCHAR}
+    where ORDER_ID = #{orderId,jdbcType=VARCHAR}
+      and EXT_KEY = #{extKey,jdbcType=VARCHAR}
+  </update>
+  
+  <select id="selectByOrderId" resultMap="BaseResultMap" parameterType="String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_order_ext
+    where ORDER_ID = #{orderId,jdbcType=VARCHAR}
+  </select>
+</mapper>

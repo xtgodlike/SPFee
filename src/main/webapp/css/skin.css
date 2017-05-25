@@ -1,0 +1,294 @@
+body {
+	font-family: "Microsoft Yahei";
+	margin: 0;
+	height: 100%;
+	color: #333;
+	padding: 0;
+}
+
+html {
+	height: 100%;
+}
+
+img {
+	border: none;
+}
+
+a {
+	cursor: pointer;
+}
+
+.nav_left{
+	float: left;
+	width: 200px;
+	height: 400px;
+}
+
+.nav_left a{
+	display: block;
+	text-align: left;
+	padding-left:5px;
+	height: 30px;
+	background: #EEEEEE;
+	width: 180px;
+	margin-left: 20px;
+	line-height: 30px;
+	vertical-align: middle;
+	margin-top: 1px;
+	border-left: 3px solid #EEEEEE;
+	font-size: 14px;
+	text-decoration: none;
+	color: #555;
+}
+
+.nav_left a:hover{
+	/* border-left: 3px solid #379be9;
+	color: #379be9; */
+	background: #dbdbdb;
+	border-left: 3px solid #dbdbdb;
+}
+
+#current_nav{
+	border-left: 3px solid #379be9;
+	color: #379be9;
+}
+
+#alert_message {
+	width: 700px;
+	font-size: 14px;
+	margin-top: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	display:none;
+	background:#dbdbdb;
+	margin-left:20px;
+	margin-bottom:20px;
+	word-wrap:break-word;
+}
+
+.nav_div_bg {
+	background: url("../images/titile_logo2.png") 1% no-repeat;
+	height: 70px;
+	width: 100%;
+	line-height: 70px;
+	vertical-align: middle;
+	/* padding-left: 160px; */
+	font-size: 20px;
+	border-bottom:1px solid #dbdbdb;
+	color:#777;
+}
+
+.api_div_list {
+	width: 100%;
+}
+
+.api_div_list table {
+	width: 98%;
+	margin: 0 auto;
+	margin-top: 30px;
+}
+
+.api_div_list table thead tr {
+	height: 50px;
+}
+
+.api_div_list table thead tr th {
+	font-size: 18px;
+	font-weight: normal;
+	border-bottom: 1px solid #333;
+	text-align: left;
+}
+
+.api_div_list table tbody tr {
+	height: 50px;
+}
+
+.api_div_list table tbody tr:hover {
+	
+}
+
+.api_div_list table tbody tr td {
+	font-size: 13px;
+	padding-left: 40px;
+}
+
+.api_div_list table tbody tr td a {
+	color: #336699;
+	text-decoration: none;
+}
+
+.api_div_list table tbody tr td a:hover {
+	color: #6699cc;
+	text-decoration: underline;
+}
+
+.api_div_list table tbody tr td span {
+	color: red;
+	margin-left: 10px;
+}
+
+.api_nav_title {
+	width: 98%;
+	margin: 0 auto;
+	height: 50px;
+	border-bottom: 1px solid #555;
+	line-height: 50px;
+	font-size: 14px;
+}
+
+.api_nav_title a {
+	color: #336699;
+	text-decoration: none;
+}
+
+.api_nav_title a:hover {
+	color: #6699cc;
+	text-decoration: underline;
+}
+
+.api_from_div {
+	width: 700px;
+	float: left;
+}
+
+.api_from_div .tab1 {
+	width: 98%;
+	margin: 0 auto;
+	margin-left: 20px;
+}
+
+.api_from_div .tab1 thead  tr {
+	height: 30px;
+}
+
+.api_from_div .tab1 thead  tr th {
+	text-align: left;
+}
+
+.api_from_div .tab1 tbody  tr {
+	height: 30px;
+}
+
+.api_from_div .tab1 tbody  tr td {
+	font-size: 14px;
+}
+
+.api_from_div .tab1 tbody  tr td span {
+	font-weight: bold;
+}
+
+.api_from_div .tab2 {
+	width: 700px;
+	margin-left: 20px;
+	border: 1px solid #dbdbdb;
+}
+
+.tab2 thead tr {
+	background: #dbdbdb;
+	height: 30px;
+}
+
+.tab2 tbody tr {
+	height: 30px;
+}
+
+.tab2 tbody tr td {
+	padding-left: 5px;
+	font-size: 14px;
+}
+
+.tab2 tbody tr td input {
+	width: 98%;
+	border: 1px solid #dbdbdb;
+	height: 20px;
+}
+
+.def_button {
+	float: right;
+	margin: 5px;
+	margin-right: 8px;
+	background: #555;
+	border: #555;
+	color: #fff;
+	height: 25px;
+	width: 50px;
+}
+
+.def_button:hover {
+	background: #fff;
+	color: #555;
+	border: 1px solid #555;
+	cursor: pointer;
+}
+
+.tab_content {
+	width: 98%;
+	margin: 0 auto;
+	margin-top: 10px;
+	font-size: 15px;
+}
+
+.tab_content thead  tr {
+	height: 30px;
+}
+
+.tab_content thead  tr th {
+	text-align: left;
+}
+
+.tab_content tbody  tr td p {
+	line-height: 10px;
+}
+
+.tab_content_info {
+	background: #e5e5cc;
+}
+
+.tab_content_info tr td {
+	padding: 5px;
+	font-size: 13px;
+}
+
+.down_link {
+	text-decoration: none;
+	color: #336699;
+}
+
+.down_link:hover {
+	text-decoration: underline;
+}
+
+.api_from_div .tab3 {
+	width: 700px;
+	margin-left: 20px;
+	border: 1px solid #dbdbdb;
+	border-right: none;
+	border-bottom: none;
+}
+
+.tab3 thead tr {
+	background: #dbdbdb;
+	height: 30px;
+}
+
+.tab3 thead tr th {
+	padding-left: 5px;
+}
+
+.tab3 tbody tr {
+	height: 40px;
+}
+
+.tab3 tbody tr td {
+	padding-left: 5px;
+	font-size: 14px;
+	border-bottom: 1px solid #dbdbdb;
+	border-right: 1px solid #dbdbdb;
+}
+
+.tab_title {
+	margin-left: 20px;
+	height: 30px;
+	font-weight: bold;
+	font-size: 14px;
+}

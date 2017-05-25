@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.OrderDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TOrder" >
+    <id column="ORDER_ID" property="orderId" jdbcType="VARCHAR" />
+    <result column="PIPLE_ID" property="pipleId" jdbcType="VARCHAR" />
+    <result column="MOBILE" property="mobile" jdbcType="VARCHAR" />
+    <result column="CHANNEL_ID" property="channelId" jdbcType="VARCHAR" />
+    <result column="PRODUCT_ID" property="productId" jdbcType="VARCHAR" />
+    <result column="ORDER_STATUS" property="orderStatus" jdbcType="INTEGER" />
+    <result column="SUB_STATUS" property="subStatus" jdbcType="INTEGER" />
+    <result column="PIPLE_ORDER_ID" property="pipleOrderId" jdbcType="VARCHAR" />
+    <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="MOD_TIME" property="modTime" jdbcType="TIMESTAMP" />
+    <result column="COMPLETE_TIME" property="completeTime" jdbcType="TIMESTAMP" />
+    <result column="DEC_STATUS" property="decStatus" jdbcType="INTEGER" />
+    <result column="RND" property="rnd" jdbcType="INTEGER" />
+    <result column="PROVINCE_ID" property="provinceId" jdbcType="INTEGER" />
+    <result column="IMEI" property="imei" jdbcType="VARCHAR" />
+    <result column="IMSI" property="imsi" jdbcType="VARCHAR" />
+    <result column="ICCID" property="iccid" jdbcType="VARCHAR" />
+    <result column="RESULT_CODE" property="resultCode" jdbcType="VARCHAR" />
+    <result column="VOLT" property="volt" jdbcType="INTEGER" />
+    <result column="ORDER_GROUP_ID" property="groupId" jdbcType="VARCHAR" />
+    <result column="AMOUNT" property="amount" jdbcType="DECIMAL" />
+    <result column="FLOWID" property="flowId" jdbcType="VARCHAR" />
+    <result column="EXTDATA" property="extData" jdbcType="VARCHAR" />
+    <result column="APP_ID" property="appId" jdbcType="VARCHAR" />
+    <result column="TRANS_SOURCE" property="fromType" jdbcType="INTEGER" />
+    <result column="CHANNEL_SYNC_STATUS" property="syncResultCode" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ORDER_ID, PIPLE_ID, MOBILE, CHANNEL_ID, PRODUCT_ID, APP_ID,ORDER_STATUS, SUB_STATUS, PIPLE_ORDER_ID, 
+    CREATE_TIME, MOD_TIME, COMPLETE_TIME, DEC_STATUS, RND,PROVINCE_ID, IMEI,IMSI, ICCID, RESULT_CODE,VOLT,ORDER_GROUP_ID,AMOUNT,FLOWID,EXTDATA,TRANS_SOURCE,CHANNEL_SYNC_STATUS
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_order
+    where ORDER_ID = #{orderId,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByPipleOrderId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_order
+   <!--  where PIPLE_ORDER_ID LIKE  "%"#{pipleOrderId,jdbcType=VARCHAR}"%" -->  
+    where PIPLE_ORDER_ID = #{pipleOrderId,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByPipleKey" resultMap="BaseResultMap" parameterType="com.qy.sp.fee.dto.PipleOrderIdParam" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_order
+    where PIPLE_ID = #{pipleID,jdbcType=VARCHAR}
+      and PIPLE_ORDER_ID = #{pipleOrderID,jdbcType=VARCHAR}
+  </select>
+  <select id="getUnmatchProvinceMobiles" resultType="java.lang.String">
+    select 
+    DISTINCT(MOBILE) AS MOBILE
+    from t_order
+    where (PROVINCE_ID IS NULL OR PROVINCE_ID = 0) AND MOBILE IS NOT NULL LIMIT #{num}
+  </select>
+  <select id="getAmountForDay" resultType="java.lang.Double" parameterType="com.qy.sp.fee.dto.TOrder">
+   SELECT IF(SUM(t.amount) IS NULL,0,SUM(t.amount)) AS AMOUNT FROM t_order t 
+   WHERE TO_DAYS(t.CREATE_TIME) = TO_DAYS(NOW())
+   and ORDER_STATUS = 2
+   and DEC_STATUS = 0
+   and PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+   and CHANNEL_ID = #{channelId,jdbcType=VARCHAR};
+  </select>
+  <select id="getAmountForMonth" resultType="java.lang.Double" parameterType="com.qy.sp.fee.dto.TOrder">
+   SELECT 
+ 	IF(SUM(t.amount) IS NULL,0,SUM(t.amount)) AS AMOUNT
+	FROM t_sta_daily t 
+	WHERE DATE_FORMAT(t.COMP_DATE,'%Y-%m')=DATE_FORMAT(NOW(),'%Y-%m') 
+	and t.ORDER_STATUS = 2
+	and t.DEC_STATUS = 0
+	and PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+    and CHANNEL_ID = #{channelId,jdbcType=VARCHAR};
+  </select>
+  <select id="getAmountForChannelProvinceDay" resultType="java.lang.Double" parameterType="com.qy.sp.fee.dto.TOrder">
+   SELECT IF(SUM(t.amount) IS NULL,0,SUM(t.amount)) AS AMOUNT FROM t_order t 
+   WHERE TO_DAYS(t.CREATE_TIME) = TO_DAYS(NOW())
+   and ORDER_STATUS = 2
+   and DEC_STATUS = 0
+   and PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+   and CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+   and PROVINCE_ID = #{provinceId,jdbcType=INTEGER}
+  </select>
+  <select id="getAmountForChannelProvinceMonth" resultType="java.lang.Double" parameterType="com.qy.sp.fee.dto.TOrder">
+   SELECT 
+ 	IF(SUM(t.amount) IS NULL,0,SUM(t.amount)) AS AMOUNT
+	FROM t_sta_daily t 
+	WHERE DATE_FORMAT(t.COMP_DATE,'%Y-%m')=DATE_FORMAT(NOW(),'%Y-%m') 
+	and t.ORDER_STATUS = 2
+	and t.DEC_STATUS = 0
+	and PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+    and CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+    and PROVINCE_ID = #{provinceId,jdbcType=INTEGER}
+  </select>
+   <select id="getAmountForMobileDay" resultType="java.lang.Double" parameterType="com.qy.sp.fee.dto.TOrder">
+   SELECT IF(SUM(t.amount) IS NULL,0,SUM(t.amount)) AS AMOUNT FROM t_order t 
+   WHERE TO_DAYS(t.CREATE_TIME) = TO_DAYS(NOW())
+   and ORDER_STATUS = 2
+   and PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+   <if test="mobile != null" >
+   and MOBILE = #{mobile,jdbcType=VARCHAR}
+   </if>
+   <if test="imsi != null" >
+   and IMSI = #{imsi,jdbcType=VARCHAR}
+   </if>
+  </select>
+   <select id="getCountForMobileDay" resultType="java.lang.Integer" parameterType="com.qy.sp.fee.dto.TOrder">
+   SELECT count(*) FROM t_order t 
+   WHERE TO_DAYS(t.CREATE_TIME) = TO_DAYS(NOW())
+   and ORDER_STATUS = 2
+   and PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  <if test="mobile != null" >
+   and MOBILE = #{mobile,jdbcType=VARCHAR}
+   </if>
+   <if test="imsi != null" >
+   and IMSI = #{imsi,jdbcType=VARCHAR}
+   </if>
+  </select>
+  <select id="getAmountForMobileMonth" resultType="java.lang.Double" parameterType="com.qy.sp.fee.dto.TOrder">
+  SELECT IF(SUM(amount) IS NULL,0,SUM(amount)) AS AMOUNT FROM
+	t_order t
+   WHERE DATE_FORMAT(t.CREATE_TIME,'%Y-%m')=DATE_FORMAT(NOW(),'%Y-%m') 
+   AND t.ORDER_STATUS = 2
+   AND t.PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+   <if test="mobile != null" >
+   and MOBILE = #{mobile,jdbcType=VARCHAR}
+   </if>
+   <if test="imsi != null" >
+   and IMSI = #{imsi,jdbcType=VARCHAR}
+   </if>
+  </select>
+  <select id="getCountForMobileMonth" resultType="java.lang.Integer" parameterType="com.qy.sp.fee.dto.TOrder">
+   SELECT count(*) FROM
+	t_order t
+   WHERE DATE_FORMAT(t.CREATE_TIME,'%Y-%m')=DATE_FORMAT(NOW(),'%Y-%m') 
+   AND t.ORDER_STATUS = 2
+   AND t.PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  <if test="mobile != null" >
+   and MOBILE = #{mobile,jdbcType=VARCHAR}
+   </if>
+   <if test="imsi != null" >
+   and IMSI = #{imsi,jdbcType=VARCHAR}
+   </if>
+  </select>
+   <select id="getAmountForMobileGlobalDay" resultType="java.lang.Double" parameterType="com.qy.sp.fee.dto.TOrder">
+   SELECT IF(SUM(t.amount) IS NULL,0,SUM(t.amount)) AS AMOUNT FROM t_order t 
+   WHERE TO_DAYS(t.CREATE_TIME) = TO_DAYS(NOW())
+   and ORDER_STATUS = 2
+   <if test="mobile != null" >
+   and MOBILE = #{mobile,jdbcType=VARCHAR}
+   </if>
+   <if test="imsi != null" >
+   and IMSI = #{imsi,jdbcType=VARCHAR}
+   </if>
+  </select>
+   <select id="getAmountForMobileGlobalMonth" resultType="java.lang.Double" parameterType="com.qy.sp.fee.dto.TOrder">
+  SELECT IF(SUM(amount) IS NULL,0,SUM(amount)) AS AMOUNT FROM
+	t_order t
+   WHERE DATE_FORMAT(t.CREATE_TIME,'%Y-%m')=DATE_FORMAT(NOW(),'%Y-%m') 
+   AND t.ORDER_STATUS = 2
+   <if test="mobile != null" >
+   and MOBILE = #{mobile,jdbcType=VARCHAR}
+   </if>
+   <if test="imsi != null" >
+   and IMSI = #{imsi,jdbcType=VARCHAR}
+   </if>
+  </select>
+ <select id="getAmountForPipleDay" resultType="java.lang.Double" parameterType="com.qy.sp.fee.dto.TOrder">
+   SELECT IF(SUM(t.amount) IS NULL,0,SUM(t.amount)) AS AMOUNT FROM t_order t 
+   WHERE TO_DAYS(t.CREATE_TIME) = TO_DAYS(NOW())
+   and ORDER_STATUS = 2
+   and PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  </select>
+  <select id="getAmountForPipleMonth" resultType="java.lang.Double" parameterType="com.qy.sp.fee.dto.TOrder">
+   SELECT IF(SUM(amount) IS NULL,0,SUM(amount)) AS AMOUNT FROM
+	t_order t
+   WHERE DATE_FORMAT(t.CREATE_TIME,'%Y-%m')=DATE_FORMAT(NOW(),'%Y-%m') 
+   AND t.ORDER_STATUS = 2
+   AND t.PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_order
+    where ORDER_ID = #{orderId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TOrder" >
+    insert into t_order (ORDER_ID, PIPLE_ID, MOBILE, 
+      CHANNEL_ID, PRODUCT_ID, APP_ID,ORDER_STATUS, 
+      SUB_STATUS, PIPLE_ORDER_ID, CREATE_TIME, 
+      MOD_TIME, COMPLETE_TIME, DEC_STATUS, 
+      RND, PROVINCE_ID,IMEI,IMSI, ICCID, RESULT_CODE, VOLT,ORDER_GROUP_ID,AMOUNT,FLOWID,EXTDATA,TRANS_SOURCE,CHANNEL_SYNC_STATUS
+      )
+    values (#{orderId,jdbcType=VARCHAR}, #{pipleId,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR}, 
+      #{channelId,jdbcType=VARCHAR}, #{productId,jdbcType=VARCHAR}, #{appId,jdbcType=VARCHAR},  #{orderStatus,jdbcType=INTEGER}, 
+      #{subStatus,jdbcType=INTEGER}, #{pipleOrderId,jdbcType=VARCHAR}, CURRENT_TIMESTAMP, 
+      CURRENT_TIMESTAMP, #{completeTime,jdbcType=TIMESTAMP}, #{decStatus,jdbcType=INTEGER}, 
+      #{rnd,jdbcType=INTEGER}, #{provinceId,jdbcType=INTEGER}, #{imei,jdbcType=VARCHAR},#{imsi,jdbcType=VARCHAR}, #{iccid,jdbcType=VARCHAR}, #{resultCode,jdbcType=VARCHAR}, 
+      #{volt,jdbcType=INTEGER},#{groupId,jdbcType=VARCHAR},#{amount,jdbcType=DECIMAL},#{flowId,jdbcType=VARCHAR},#{extData,jdbcType=VARCHAR},
+      #{fromType,jdbcType=INTEGER},#{syncResultCode,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TOrder" >
+    insert into t_order
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="orderId != null" >
+        ORDER_ID,
+      </if>
+      <if test="pipleId != null" >
+        PIPLE_ID,
+      </if>
+      <if test="mobile != null" >
+        MOBILE,
+      </if>
+      <if test="channelId != null" >
+        CHANNEL_ID,
+      </if>
+      <if test="productId != null" >
+        PRODUCT_ID,
+      </if>
+       <if test="appId != null" >
+        APP_ID,
+      </if>
+      <if test="orderStatus != null" >
+        ORDER_STATUS,
+      </if>
+      <if test="subStatus != null" >
+        SUB_STATUS,
+      </if>
+      <if test="pipleOrderId != null" >
+        PIPLE_ORDER_ID,
+      </if>
+      <if test="createTime != null" >
+        CREATE_TIME,
+      </if>
+      <if test="modTime != null" >
+        MOD_TIME,
+      </if>
+      <if test="completeTime != null" >
+        COMPLETE_TIME,
+      </if>
+      <if test="decStatus != null" >
+        DEC_STATUS,
+      </if>
+      <if test="rnd != null" >
+        RND,
+      </if>
+      <if test="provinceId != null" >
+        PROVINCE_ID,
+      </if>
+      <if test="imsi != null" >
+        IMEI,
+      </if>
+      <if test="imsi != null" >
+        IMSI,
+      </if>
+      <if test="iccid != null" >
+        ICCID,
+      </if>
+      <if test="resultCode != null" >
+        RESULT_CODE,
+      </if>
+      <if test="volt != null" >
+        VOLT,
+      </if>
+      <if test="groupId != null" >
+      	ORDER_GROUP_ID,
+      </if>
+      <if test="amount != null" >
+        AMOUNT,
+      </if>
+      <if test="flowId != null" >
+        FLOWID,
+      </if>
+	  <if test="extData != null" >
+        EXTDATA,
+      </if>    
+      <if test="fromType != null" >
+        TRANS_SOURCE,
+      </if>
+	  <if test="syncResultCode != null" >
+        CHANNEL_SYNC_STATUS,
+      </if>    
+      </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="orderId != null" >
+        #{orderId,jdbcType=VARCHAR},
+      </if>
+      <if test="pipleId != null" >
+        #{pipleId,jdbcType=VARCHAR},
+      </if>
+      <if test="mobile != null" >
+        #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="channelId != null" >
+        #{channelId,jdbcType=VARCHAR},
+      </if>
+      <if test="productId != null" >
+        #{productId,jdbcType=VARCHAR},
+      </if>
+      <if test="appId != null" >
+        #{appId,jdbcType=VARCHAR},
+      </if>
+      <if test="orderStatus != null" >
+        #{orderStatus,jdbcType=INTEGER},
+      </if>
+      <if test="subStatus != null" >
+        #{subStatus,jdbcType=INTEGER},
+      </if>
+      <if test="pipleOrderId != null" >
+        #{pipleOrderId,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modTime != null" >
+       CURRENT_TIMESTAMP,
+      </if>
+      <if test="completeTime != null" >
+        CURRENT_TIMESTAMP,
+      </if>
+      <if test="decStatus != null" >
+        #{decStatus,jdbcType=INTEGER},
+      </if>
+      <if test="rnd != null" >
+        #{rnd,jdbcType=INTEGER},
+      </if>
+      <if test="provinceId != null" >
+        #{provinceId,jdbcType=INTEGER},
+      </if>
+      <if test="imei != null" >
+        #{imei,jdbcType=VARCHAR},
+      </if>
+      <if test="imsi != null" >
+        #{imsi,jdbcType=VARCHAR},
+      </if>
+      <if test="iccid != null" >
+        #{iccid,jdbcType=VARCHAR},
+      </if>
+      <if test="resultCode != null" >
+        #{resultCode,jdbcType=VARCHAR},
+      </if>
+      <if test="volt != null" >
+        #{volt,jdbcType=INTEGER},
+      </if>
+      <if test="groupId != null" >
+        #{groupId,jdbcType=VARCHAR},
+        </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=DECIMAL},
+      </if>
+       <if test="flowId != null" >
+       #{flowId,jdbcType=VARCHAR},
+      </if>
+	   <if test="extData != null" >
+        #{extData,jdbcType=VARCHAR},
+      </if>    
+       <if test="fromType != null" >
+       #{fromType,jdbcType=VARCHAR},
+      </if>
+	   <if test="syncResultCode != null" >
+        #{syncResultCode,jdbcType=VARCHAR},
+      </if>    
+      </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TOrder" >
+    update t_order
+    <set >
+      <if test="pipleId != null" >
+        PIPLE_ID = #{pipleId,jdbcType=VARCHAR},
+      </if>
+      <if test="mobile != null" >
+        MOBILE = #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="channelId != null" >
+        CHANNEL_ID = #{channelId,jdbcType=VARCHAR},
+      </if>
+      <if test="productId != null" >
+        PRODUCT_ID = #{productId,jdbcType=VARCHAR},
+      </if>
+      <if test="appId != null" >
+        APP_ID = #{appId,jdbcType=VARCHAR},
+      </if>
+      <if test="orderStatus != null" >
+        ORDER_STATUS = #{orderStatus,jdbcType=INTEGER},
+      </if>
+      <if test="subStatus != null" >
+        SUB_STATUS = #{subStatus,jdbcType=INTEGER},
+      </if>
+      <if test="pipleOrderId != null" >
+        PIPLE_ORDER_ID = #{pipleOrderId,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modTime != null" >
+        MOD_TIME = #{modTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="completeTime != null" >
+        COMPLETE_TIME = #{completeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="decStatus != null" >
+        DEC_STATUS = #{decStatus,jdbcType=INTEGER},
+      </if>
+      <if test="rnd != null" >
+        RND = #{rnd,jdbcType=INTEGER},
+      </if>
+      <if test="provinceId != null" >
+        PROVINCE_ID = #{provinceId,jdbcType=INTEGER},
+      </if>
+      <if test="imei != null" >
+        IMEI = #{imei,jdbcType=VARCHAR},
+      </if>
+      <if test="imsi != null" >
+        IMSI = #{imsi,jdbcType=VARCHAR},
+      </if>
+      <if test="iccid != null" >
+        ICCID = #{iccid,jdbcType=VARCHAR},
+      </if>
+      <if test="resultCode != null" >
+        RESULT_CODE = #{resultCode,jdbcType=VARCHAR},
+      </if>
+      <if test="volt != null" >
+        VOLT = #{volt,jdbcType=INTEGER},
+      </if>
+      <if test="groupId != null" >
+        ORDER_GROUP_ID = #{groupId,jdbcType=VARCHAR},
+        </if>
+      <if test="amount != null" >
+        AMOUNT = #{amount,jdbcType=DECIMAL},
+      </if>
+      <if test="flowId != null" >
+        FLOWID = #{flowId,jdbcType=VARCHAR},
+      </if>
+	  <if test="extData != null" >
+        EXTDATA = #{extData,jdbcType=VARCHAR},
+      </if>
+      <if test="fromType != null" >
+        TRANS_SOURCE = #{fromType,jdbcType=VARCHAR},
+      </if>
+	  <if test="syncResultCode != null" >
+        CHANNEL_SYNC_STATUS = #{syncResultCode,jdbcType=VARCHAR},
+      </if>        
+      </set>
+    where ORDER_ID = #{orderId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TOrder" >
+    update t_order
+    set PIPLE_ID = #{pipleId,jdbcType=VARCHAR},
+      MOBILE = #{mobile,jdbcType=VARCHAR},
+      CHANNEL_ID = #{channelId,jdbcType=VARCHAR},
+      PRODUCT_ID = #{productId,jdbcType=VARCHAR},
+      APP_ID = #{appId,jdbcType=VARCHAR},
+      ORDER_STATUS = #{orderStatus,jdbcType=INTEGER},
+      SUB_STATUS = #{subStatus,jdbcType=INTEGER},
+      PIPLE_ORDER_ID = #{pipleOrderId,jdbcType=VARCHAR},
+      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      MOD_TIME = CURRENT_TIMESTAMP,
+      COMPLETE_TIME =CURRENT_TIMESTAMP,,
+      DEC_STATUS = #{decStatus,jdbcType=INTEGER},
+      RND = #{rnd,jdbcType=INTEGER},
+      PROVINCE_ID = #{provinceId,jdbcType=INTEGER},
+      IMEI = #{imei,jdbcType=VARCHAR},
+      IMSI = #{imsi,jdbcType=VARCHAR},
+      ICCID = #{iccid,jdbcType=VARCHAR},
+      RESULT_CODE = #{resultCode,jdbcType=VARCHAR},
+      VOLT = #{volt,jdbcType=VARCHAR},
+      ORDER_GROUP_ID = #{groupId,jdbcType=VARCHAR},
+      AMOUNT = #{amount,jdbcType=DECIMAL},
+      FLOWID = #{flowId,jdbcType=VARCHAR},
+	  EXTDATA = #{extData,jdbcType=VARCHAR},
+	  TRANS_SOURCE = #{fromType,jdbcType=VARCHAR},
+	  CHANNEL_SYNC_STATUS = #{syncResultCode,jdbcType=VARCHAR}
+    where ORDER_ID = #{orderId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateBatchProvinceId" parameterType="java.util.List">
+  	update t_order
+          <trim prefix="set" suffixOverrides=",">
+           <trim prefix="PROVINCE_ID =case" suffix="end,">
+               <foreach collection="list" item="i" index="index">
+                       <if test="i.provinceId!=null">
+                        when LEFT(MOBILE, 7) =#{i.segment} then #{i.provinceId}
+                       </if>
+               </foreach>
+            </trim>
+            <trim prefix="MOD_TIME =case" suffix="end,">
+               <foreach collection="list" item="i" index="index">
+                        when LEFT(MOBILE, 7) =#{i.segment} then CURRENT_TIMESTAMP
+               </foreach>
+            </trim>
+           </trim>
+          where
+          <foreach collection="list" separator="or" item="i" index="index" >
+            LEFT(MOBILE, 7) = #{i.segment}
+        </foreach>
+  </update>
+</mapper>

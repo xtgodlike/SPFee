@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.SdkConfigDao">
+	<resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TSdkConfig">
+		<id column="CONFIG_ID" property="configId" jdbcType="VARCHAR" />
+		<result column="CONFIG_VALUE" property="configValue" jdbcType="VARCHAR" />
+		<result column="CONFIG_DESCRIPTION" property="configDescription"
+			jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="MOD_TIME" property="modifyTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		CONFIG_ID,CONFIG_DESCRIPTION, CREATE_TIME, MOD_TIME
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from t_sdkconfig
+		where CONFIG_ID = #{configId,jdbcType=VARCHAR}
+	</select>
+	<select id="selectConfigurationsByConfigQueryKey" resultMap="BaseResultMap"
+		parameterType="com.qy.sp.fee.dto.TSdkConfigQueryKey">
+		<if test="phoneId != null">
+			select CONFIG_ID, CONFIG_VALUE from t_sdkconfig_phone where phone_id =
+			#{phoneId,jdbcType=VARCHAR} and config_id = #{configId,jdbcType=VARCHAR}
+		</if>
+		<if test="phoneId == null and channelId == null and appId == null and provinceId == null and pipleId == null">
+			select CONFIG_ID, CONFIG_VALUE from t_sdkconfig_global where
+			config_id = #{configId,jdbcType=VARCHAR}
+		</if>
+		<if test="phoneId == null and (channelId != null or appId != null or provinceId != null or pipleId != null)">
+
+			select * from t_sdkconfig_cross where config_id = #{configId,jdbcType=VARCHAR}
+			<if test="channelId != null ">
+				and ( channel_id = #{channelId,jdbcType=VARCHAR} or channel_id = '')
+			</if>
+			<if test="appId != null ">
+				and ( app_id = #{appId,jdbcType=VARCHAR} or app_id = '')
+			</if>
+			<if test="provinceId != null ">
+				and ( province_id = #{provinceId,jdbcType=VARCHAR} or province_id = '')
+			</if>
+			<if test="pipleId != null ">
+				and ( piple_id = #{pipleId,jdbcType=VARCHAR} or piple_id = '')
+			</if>
+		</if>
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from t_sdkconfig
+		where CONFIG_ID = #{configId,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.qy.sp.fee.dto.TSdkConfig">
+		insert into t_sdkconfig (config_id, config_description,
+		create_time, mod_time)
+		values (#{configId,jdbcType=VARCHAR}, #{configDescription,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP})
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TSdkConfig">
+		update t_sdkconfig
+		set
+		config_description = #{configDescription,jdbcType=VARCHAR},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		mod_time = #{modifyTime,jdbcType=TIMESTAMP}
+		where config_id = #{configId,jdbcType=VARCHAR}
+	</update>
+</mapper>

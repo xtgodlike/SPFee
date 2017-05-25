@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.SdkconfigMobileBaseDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TSdkconfigMobileBase" >
+    <id column="APP_ID" property="appId" jdbcType="VARCHAR" />
+    <id column="CONTENT_ID" property="contentId" jdbcType="VARCHAR" />
+    <id column="CONTENT_NAME" property="contentName" jdbcType="VARCHAR" />
+    <result column="RELEASE_CHANNEL_ID" property="releaseChannelId" jdbcType="VARCHAR" />
+    <result column="RELEASE_CHANNEL_NAME" property="releaseChannelName" jdbcType="VARCHAR" />
+    <result column="CP_ID" property="cpId" jdbcType="VARCHAR" />
+    <result column="CP_NAME" property="cpName" jdbcType="VARCHAR" />
+    <result column="START_CODE_TIME" property="startCodeTime" jdbcType="VARCHAR" />
+    <result column="IS_USE_BWHITE" property="isUseBWhite" jdbcType="VARCHAR" />
+    <result column="IS_OPEN" property="isOpen" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    APP_ID, CONTENT_ID, CONTENT_NAME,RELEASE_CHANNEL_ID,RELEASE_CHANNEL_NAME,CP_ID,CP_NAME,START_CODE_TIME,IS_USE_BWHITE,IS_OPEN
+  </sql>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.qy.sp.fee.dto.TSdkconfigMobileBase" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_sdkconfig_mobile_base
+    where APP_ID = #{appId,jdbcType=VARCHAR}
+      and CONTENT_ID = #{contentId,jdbcType=VARCHAR}
+      and RELEASE_CHANNEL_ID = #{releaseChannelId,jdbcType=VARCHAR}
+      and CP_ID = #{cpId,jdbcType=VARCHAR}
+  </select>
+  <select id="selectSelective" resultMap="BaseResultMap" parameterType="com.qy.sp.fee.dto.TSdkconfigMobileBase" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_sdkconfig_mobile_base
+    where 1=1 
+     <if test="appId != null and appId != ''" >
+      and APP_ID = #{appId,jdbcType=VARCHAR}
+      </if>
+     <if test="contentId != null and contentId != ''" >
+      and CONTENT_ID = #{contentId,jdbcType=VARCHAR}
+      </if>
+     <if test="releaseChannelId != null and releaseChannelId != ''" >
+       and RELEASE_CHANNEL_ID = #{releaseChannelId,jdbcType=VARCHAR}
+      </if>
+     <if test="cpId != null and cpId != ''" >
+      and CP_ID = #{cpId,jdbcType=VARCHAR}
+      </if>
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="com.qy.sp.fee.dto.TSdkconfigMobileBase" >
+    delete from t_sdkconfig_mobile_base
+    where APP_ID = #{appId,jdbcType=VARCHAR}
+      and CONTENT_ID = #{contentId,jdbcType=VARCHAR}
+      and RELEASE_CHANNEL_ID = #{releaseChannelId,jdbcType=VARCHAR}
+      and CP_ID = #{cpId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TSdkconfigMobileBase" >
+    insert into t_sdkconfig_mobile_base (APP_ID, CONTENT_ID, CONTENT_NAME,RELEASE_CHANNEL_ID,RELEASE_CHANNEL_NAME,CP_ID,CP_NAME,START_CODE_TIME,IS_USE_BWHITE,IS_OPEN)
+    values (#{appId,jdbcType=VARCHAR}, #{contentId,jdbcType=VARCHAR}, #{contentName,jdbcType=VARCHAR},
+      #{releaseChannelId,jdbcType=VARCHAR},#{releaseChannelName,jdbcType=VARCHAR}, #{cpId,jdbcType=VARCHAR},#{cpName,jdbcType=VARCHAR},
+      #{startCodeTime,jdbcType=VARCHAR},#{isUseBWhite,jdbcType=VARCHAR},#{isOpen,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TSdkconfigMobileBase" >
+    insert into t_sdkconfig_mobile_base
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="appId != null" >
+        APP_ID,
+      </if>
+      <if test="contentId != null" >
+        CONTENT_ID,
+      </if>
+         <if test="contentName != null" >
+        CONTENT_NAME,
+      </if>
+      <if test="releaseChannelId != null" >
+        RELEASE_CHANNEL_ID,
+      </if>
+      <if test="releaseChannelName != null" >
+        RELEASE_CHANNEL_NAME,
+      </if>
+      <if test="cpId != null" >
+        CP_ID,
+      </if>
+      <if test="cpName != null" >
+        CP_NAME,
+      </if>
+      <if test="startCodeTime != null" >
+        START_CODE_TIME,
+      </if>
+      <if test="isUseBWhite != null" >
+        IS_USE_BWHITE,
+      </if>
+      <if test="isOpen != null" >
+        IS_OPEN
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="appId != null" >
+        #{appId,jdbcType=VARCHAR},
+      </if>
+      <if test="contentId != null" >
+        #{contentId,jdbcType=VARCHAR},
+      </if>
+      <if test="contentName != null" >
+        #{contentName,jdbcType=VARCHAR},
+      </if>
+      <if test="releaseChannelId != null" >
+        #{releaseChannelId,jdbcType=VARCHAR},
+      </if>
+      <if test="cpId != null" >
+        #{cpId,jdbcType=VARCHAR},
+      </if>
+      <if test="cpName != null" >
+        #{cpName,jdbcType=VARCHAR},
+      </if>
+      <if test="startCodeTime != null" >
+        #{startCodeTime,jdbcType=VARCHAR},
+      </if>
+      <if test="isUseBWhite != null" >
+        #{isUseBWhite,jdbcType=VARCHAR},
+      </if>
+      <if test="isOpen != null" >
+        #{isOpen,jdbcType=VARCHAR}
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TSdkconfigMobileBase" >
+    update t_sdkconfig_mobile_base
+    <set >
+      <if test="startCodeTime != null" >
+        START_CODE_TIME = #{startCodeTime,jdbcType=VARCHAR},
+      </if>
+      <if test="isUseBWhite != null" >
+        IS_USE_BWHITE = #{isUseBWhite,jdbcType=VARCHAR},
+      </if>
+      <if test="isOpen != null" >
+        IS_OPEN = #{isOpen,jdbcType=VARCHAR}
+      </if>
+    </set>
+    where 
+      APP_ID = #{appId,jdbcType=VARCHAR}
+      and CONTENT_ID = #{contentId,jdbcType=VARCHAR}
+      and RELEASE_CHANNEL_ID = #{releaseChannelId,jdbcType=VARCHAR}
+      and CP_ID = #{cpId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TSdkconfigMobileBase" >
+    update t_sdkconfig_mobile_base set
+     START_CODE_TIME = #{startCodeTime,jdbcType=VARCHAR},
+     IS_USE_BWHITE = #{isUseBWhite,jdbcType=VARCHAR},
+     IS_OPEN = #{isOpen,jdbcType=VARCHAR}
+    where 
+      APP_ID = #{appId,jdbcType=VARCHAR}
+      and CONTENT_ID = #{contentId,jdbcType=VARCHAR}
+      and RELEASE_CHANNEL_ID = #{releaseChannelId,jdbcType=VARCHAR}
+      and CP_ID = #{cpId,jdbcType=VARCHAR}
+  </update>
+</mapper>

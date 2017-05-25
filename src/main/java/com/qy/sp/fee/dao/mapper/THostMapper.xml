@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.HostDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.THost" >
+    <id column="HOST_ID" property="hostId" jdbcType="INTEGER" />
+    <result column="HOST_NAME" property="hostName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    HOST_ID, HOST_NAME
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_host
+    where HOST_ID = #{hostId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_host
+    where HOST_ID = #{hostId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.THost" >
+    insert into t_host (HOST_ID, HOST_NAME)
+    values (#{hostId,jdbcType=INTEGER}, #{hostName,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.THost" >
+    insert into t_host
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="hostId != null" >
+        HOST_ID,
+      </if>
+      <if test="hostName != null" >
+        HOST_NAME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="hostId != null" >
+        #{hostId,jdbcType=INTEGER},
+      </if>
+      <if test="hostName != null" >
+        #{hostName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.THost" >
+    update t_host
+    <set >
+      <if test="hostName != null" >
+        HOST_NAME = #{hostName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where HOST_ID = #{hostId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.THost" >
+    update t_host
+    set HOST_NAME = #{hostName,jdbcType=VARCHAR}
+    where HOST_ID = #{hostId,jdbcType=INTEGER}
+  </update>
+  <select id="selectByName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_host
+    where HOST_NAME LIKE "%"#{hostName,jdbcType=VARCHAR}"%"
+  </select>
+</mapper>

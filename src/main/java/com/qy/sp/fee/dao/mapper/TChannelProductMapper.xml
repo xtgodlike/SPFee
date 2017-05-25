@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.ChannelProductDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TChannelProduct" >
+    <id column="CHANNEL_ID" property="channelId" jdbcType="VARCHAR" />
+    <id column="PRODUCT_ID" property="productId" jdbcType="VARCHAR" />
+    <result column="OP_STATUS" property="opStatus" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    CHANNEL_ID, PRODUCT_ID, OP_STATUS
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.qy.sp.fee.dto.TChannelProductKey" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_channel_product
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+      and PRODUCT_ID = #{productId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="com.qy.sp.fee.dto.TChannelProductKey" >
+    delete from t_channel_product
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+      and PRODUCT_ID = #{productId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TChannelProduct" >
+    insert into t_channel_product (CHANNEL_ID, PRODUCT_ID, OP_STATUS
+      )
+    values (#{channelId,jdbcType=VARCHAR}, #{productId,jdbcType=VARCHAR}, #{opStatus,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TChannelProduct" >
+    insert into t_channel_product
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="channelId != null" >
+        CHANNEL_ID,
+      </if>
+      <if test="productId != null" >
+        PRODUCT_ID,
+      </if>
+      <if test="opStatus != null" >
+        OP_STATUS,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="channelId != null" >
+        #{channelId,jdbcType=VARCHAR},
+      </if>
+      <if test="productId != null" >
+        #{productId,jdbcType=VARCHAR},
+      </if>
+      <if test="opStatus != null" >
+        #{opStatus,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TChannelProduct" >
+    update t_channel_product
+    <set >
+      <if test="opStatus != null" >
+        OP_STATUS = #{opStatus,jdbcType=INTEGER},
+      </if>
+    </set>
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+      and PRODUCT_ID = #{productId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TChannelProduct" >
+    update t_channel_product
+    set OP_STATUS = #{opStatus,jdbcType=INTEGER}
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+      and PRODUCT_ID = #{productId,jdbcType=VARCHAR}
+  </update>
+</mapper>

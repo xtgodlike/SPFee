@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.ProvinceDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TProvince" >
+    <id column="PROVINCE_ID" property="provinceId" jdbcType="INTEGER" />
+    <result column="PROVINCE_NAME" property="provinceName" jdbcType="VARCHAR" />
+    <result column="PROVINCE_ABS_NAME" property="provinceAbsName" jdbcType="VARCHAR" />
+    <result column="ISO_CODE" property="isoCode" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    PROVINCE_ID, PROVINCE_NAME, PROVINCE_ABS_NAME, ISO_CODE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_province
+    where PROVINCE_ID = #{provinceId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_province
+    where PROVINCE_ID = #{provinceId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TProvince" >
+    insert into t_province (PROVINCE_ID, PROVINCE_NAME, PROVINCE_ABS_NAME, 
+      ISO_CODE)
+    values (#{provinceId,jdbcType=INTEGER}, #{provinceName,jdbcType=VARCHAR}, #{provinceAbsName,jdbcType=VARCHAR}, 
+      #{isoCode,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TProvince" >
+    insert into t_province
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="provinceId != null" >
+        PROVINCE_ID,
+      </if>
+      <if test="provinceName != null" >
+        PROVINCE_NAME,
+      </if>
+      <if test="provinceAbsName != null" >
+        PROVINCE_ABS_NAME,
+      </if>
+      <if test="isoCode != null" >
+        ISO_CODE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="provinceId != null" >
+        #{provinceId,jdbcType=INTEGER},
+      </if>
+      <if test="provinceName != null" >
+        #{provinceName,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceAbsName != null" >
+        #{provinceAbsName,jdbcType=VARCHAR},
+      </if>
+      <if test="isoCode != null" >
+        #{isoCode,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TProvince" >
+    update t_province
+    <set >
+      <if test="provinceName != null" >
+        PROVINCE_NAME = #{provinceName,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceAbsName != null" >
+        PROVINCE_ABS_NAME = #{provinceAbsName,jdbcType=VARCHAR},
+      </if>
+      <if test="isoCode != null" >
+        ISO_CODE = #{isoCode,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where PROVINCE_ID = #{provinceId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TProvince" >
+    update t_province
+    set PROVINCE_NAME = #{provinceName,jdbcType=VARCHAR},
+      PROVINCE_ABS_NAME = #{provinceAbsName,jdbcType=VARCHAR},
+      ISO_CODE = #{isoCode,jdbcType=VARCHAR}
+    where PROVINCE_ID = #{provinceId,jdbcType=INTEGER}
+  </update>
+  <select id="selectByProvinceName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_province
+    where PROVINCE_NAME LIKE  "%"#{provinceName,jdbcType=VARCHAR}"%"
+  </select>
+</mapper>

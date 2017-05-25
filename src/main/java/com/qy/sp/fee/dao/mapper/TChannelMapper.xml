@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.ChannelDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TChannel" >
+    <id column="CHANNEL_ID" property="channelId" jdbcType="VARCHAR" />
+    <result column="FULL_NAME" property="fullName" jdbcType="VARCHAR" />
+    <result column="ABBR_NAME" property="abbrName" jdbcType="VARCHAR" />
+    <result column="CONTRACT_ID" property="contractId" jdbcType="VARCHAR" />
+    <result column="OP_STATUS" property="opStatus" jdbcType="INTEGER" />
+    <result column="CONTACTOR" property="contactor" jdbcType="VARCHAR" />
+    <result column="TEL" property="tel" jdbcType="VARCHAR" />
+    <result column="EMAIL" property="email" jdbcType="VARCHAR" />
+    <result column="QQ" property="qq" jdbcType="VARCHAR" />
+    <result column="API_KEY" property="apiKey" jdbcType="VARCHAR" />
+    <result column="API_PWD" property="apiPwd" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    CHANNEL_ID, FULL_NAME, ABBR_NAME, CONTRACT_ID, OP_STATUS, CONTACTOR, TEL, EMAIL, 
+    QQ, API_KEY, API_PWD
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_channel
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_channel
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TChannel" >
+    insert into t_channel (CHANNEL_ID, FULL_NAME, ABBR_NAME, 
+      CONTRACT_ID, OP_STATUS, CONTACTOR, 
+      TEL, EMAIL, QQ, API_KEY, 
+      API_PWD)
+    values (#{channelId,jdbcType=VARCHAR}, #{fullName,jdbcType=VARCHAR}, #{abbrName,jdbcType=VARCHAR}, 
+      #{contractId,jdbcType=VARCHAR}, #{opStatus,jdbcType=INTEGER}, #{contactor,jdbcType=VARCHAR}, 
+      #{tel,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{qq,jdbcType=VARCHAR}, #{apiKey,jdbcType=VARCHAR}, 
+      #{apiPwd,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TChannel" >
+    insert into t_channel
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="channelId != null" >
+        CHANNEL_ID,
+      </if>
+      <if test="fullName != null" >
+        FULL_NAME,
+      </if>
+      <if test="abbrName != null" >
+        ABBR_NAME,
+      </if>
+      <if test="contractId != null" >
+        CONTRACT_ID,
+      </if>
+      <if test="opStatus != null" >
+        OP_STATUS,
+      </if>
+      <if test="contactor != null" >
+        CONTACTOR,
+      </if>
+      <if test="tel != null" >
+        TEL,
+      </if>
+      <if test="email != null" >
+        EMAIL,
+      </if>
+      <if test="qq != null" >
+        QQ,
+      </if>
+      <if test="apiKey != null" >
+        API_KEY,
+      </if>
+      <if test="apiPwd != null" >
+        API_PWD,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="channelId != null" >
+        #{channelId,jdbcType=VARCHAR},
+      </if>
+      <if test="fullName != null" >
+        #{fullName,jdbcType=VARCHAR},
+      </if>
+      <if test="abbrName != null" >
+        #{abbrName,jdbcType=VARCHAR},
+      </if>
+      <if test="contractId != null" >
+        #{contractId,jdbcType=VARCHAR},
+      </if>
+      <if test="opStatus != null" >
+        #{opStatus,jdbcType=INTEGER},
+      </if>
+      <if test="contactor != null" >
+        #{contactor,jdbcType=VARCHAR},
+      </if>
+      <if test="tel != null" >
+        #{tel,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="qq != null" >
+        #{qq,jdbcType=VARCHAR},
+      </if>
+      <if test="apiKey != null" >
+        #{apiKey,jdbcType=VARCHAR},
+      </if>
+      <if test="apiPwd != null" >
+        #{apiPwd,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TChannel" >
+    update t_channel
+    <set >
+      <if test="fullName != null" >
+        FULL_NAME = #{fullName,jdbcType=VARCHAR},
+      </if>
+      <if test="abbrName != null" >
+        ABBR_NAME = #{abbrName,jdbcType=VARCHAR},
+      </if>
+      <if test="contractId != null" >
+        CONTRACT_ID = #{contractId,jdbcType=VARCHAR},
+      </if>
+      <if test="opStatus != null" >
+        OP_STATUS = #{opStatus,jdbcType=INTEGER},
+      </if>
+      <if test="contactor != null" >
+        CONTACTOR = #{contactor,jdbcType=VARCHAR},
+      </if>
+      <if test="tel != null" >
+        TEL = #{tel,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        EMAIL = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="qq != null" >
+        QQ = #{qq,jdbcType=VARCHAR},
+      </if>
+      <if test="apiKey != null" >
+        API_KEY = #{apiKey,jdbcType=VARCHAR},
+      </if>
+      <if test="apiPwd != null" >
+        API_PWD = #{apiPwd,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TChannel" >
+    update t_channel
+    set FULL_NAME = #{fullName,jdbcType=VARCHAR},
+      ABBR_NAME = #{abbrName,jdbcType=VARCHAR},
+      CONTRACT_ID = #{contractId,jdbcType=VARCHAR},
+      OP_STATUS = #{opStatus,jdbcType=INTEGER},
+      CONTACTOR = #{contactor,jdbcType=VARCHAR},
+      TEL = #{tel,jdbcType=VARCHAR},
+      EMAIL = #{email,jdbcType=VARCHAR},
+      QQ = #{qq,jdbcType=VARCHAR},
+      API_KEY = #{apiKey,jdbcType=VARCHAR},
+      API_PWD = #{apiPwd,jdbcType=VARCHAR}
+    where CHANNEL_ID = #{channelId,jdbcType=VARCHAR}
+  </update>
+   <select id="selectByApiKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_channel
+    where API_KEY = #{apiKey,jdbcType=VARCHAR}
+  </select>
+</mapper>

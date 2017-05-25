@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qy.sp.fee.dao.impl.LocationDao" >
+  <resultMap id="BaseResultMap" type="com.qy.sp.fee.dto.TLocation" >
+    <id column="HOST_ID" property="hostId" jdbcType="INTEGER" />
+    <id column="SEGMENT" property="segment" jdbcType="VARCHAR" />
+    <result column="PROVINCE_ID" property="provinceId" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    HOST_ID, SEGMENT, PROVINCE_ID
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.qy.sp.fee.dto.TLocationKey" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_location
+    where HOST_ID = #{hostId,jdbcType=INTEGER}
+      and SEGMENT = #{segment,jdbcType=VARCHAR}
+  </select>
+  <select id="selectBySegment" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_location
+    where  SEGMENT = #{segment,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="com.qy.sp.fee.dto.TLocationKey" >
+    delete from t_location
+    where HOST_ID = #{hostId,jdbcType=INTEGER}
+      and SEGMENT = #{segment,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qy.sp.fee.dto.TLocation" >
+    insert into t_location (HOST_ID, SEGMENT, PROVINCE_ID
+      )
+    values (#{hostId,jdbcType=INTEGER}, #{segment,jdbcType=VARCHAR}, #{provinceId,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.qy.sp.fee.dto.TLocation" >
+    insert into t_location
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="hostId != null" >
+        HOST_ID,
+      </if>
+      <if test="segment != null" >
+        SEGMENT,
+      </if>
+      <if test="provinceId != null" >
+        PROVINCE_ID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="hostId != null" >
+        #{hostId,jdbcType=INTEGER},
+      </if>
+      <if test="segment != null" >
+        #{segment,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceId != null" >
+        #{provinceId,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qy.sp.fee.dto.TLocation" >
+    update t_location
+    <set >
+      <if test="provinceId != null" >
+        PROVINCE_ID = #{provinceId,jdbcType=INTEGER},
+      </if>
+    </set>
+    where HOST_ID = #{hostId,jdbcType=INTEGER}
+      and SEGMENT = #{segment,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qy.sp.fee.dto.TLocation" >
+    update t_location
+    set PROVINCE_ID = #{provinceId,jdbcType=INTEGER}
+    where HOST_ID = #{hostId,jdbcType=INTEGER}
+      and SEGMENT = #{segment,jdbcType=VARCHAR}
+  </update>
+  <delete id="deleteBatch" parameterType="java.lang.String">
+	DELETE FROM t_location where SEGMENT IN
+	<foreach item="i" collection="list" open="(" separator="," close=")"> 
+	#{i.segment}
+	</foreach> 
+  </delete>
+  <insert id="insertBatch"  parameterType="java.util.List">  
+   REPLACE INTO t_location (HOST_ID, PROVINCE_ID, SEGMENT
+      ) 
+    values  
+    <foreach collection="list" item="item" index="index" separator="," >  
+        (#{item.hostId},#{item.provinceId},#{item.segment})  
+    </foreach>  
+  </insert>
+</mapper>
