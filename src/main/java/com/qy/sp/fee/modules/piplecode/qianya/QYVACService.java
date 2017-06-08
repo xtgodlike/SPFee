@@ -84,16 +84,15 @@ public class QYVACService extends ChannelService{
 					qyOrder.setProvinceId(provinceId);
 				}
 				bDeducted  = qyOrder.deduct(cp.getVolt());
-
+				if(!bDeducted){ // 不扣量 通知渠道
+					notifyChannelSMS(cp.getNotifyUrl(),qyOrder,"1065556131","ok");
+				}
 			}else {
 				qyOrder.setOrderStatus(GlobalConst.OrderStatus.FAIL);
 				qyOrder.setSubStatus(QYVACService.PAY_FAIL);
 				qyOrder.setModTime(DateTimeUtils.getCurrentTime());
 			}
 			SaveOrderInsert(qyOrder);
-			if(!bDeducted){ // 不扣量 通知渠道
-				notifyChannelSMS(cp.getNotifyUrl(),qyOrder,"1065556131","ok");
-			}
 			return "ok";
 		}else{
 			return "order Synchronized";

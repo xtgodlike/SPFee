@@ -16,10 +16,10 @@ public class TestHttpRequest {
 //	 	parameters.put("apiPwd", "B97FED4E9994E33353DFAA8A31428E11BD7AE59");
 		parameters.put("pipleId", "14958555721785335696481");
 //		parameters.put("appId", "a102");
-		parameters.put("productCode", "P01000");
-		parameters.put("mobile", "13636191205");
-		parameters.put("imei", "867047023126769");
-		parameters.put("imsi", "460003572366169");
+//		parameters.put("productCode", "P01000");
+//		parameters.put("mobile", "13636191205");
+//		parameters.put("imei", "867047023126769");
+//		parameters.put("imsi", "460003572366169");
 //		parameters.put("iccid", "89860085101151142361"); 
 //		parameters.put("ip", "218.21.128.31"); 
 //		parameters.put("appName", "测试APP"); 

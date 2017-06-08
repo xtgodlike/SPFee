@@ -185,7 +185,6 @@ public class DXTVideoService extends ChannelService{
 		String imsi = requestBody.optString("imsi");
 		String qid = requestBody.optString("qid");
 		String subscribe_time = requestBody.optString("subscribe_time");
-		String status = requestBody.optString("status");
 		String cp_param = requestBody.optString("cp_param");  // 我方订单号
 		String result = requestBody.optString("result");
 		String tran_id = requestBody.optString("tran_id");
@@ -204,28 +203,31 @@ public class DXTVideoService extends ChannelService{
 			String productCode = tProduct.getProductCode();
 			//扣量
 			boolean bDeducted = false;
-			if(P_SUCCESS.equals(status)){
+			if(P_SUCCESS.equals(result)){
 				order.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
 				order.setSubStatus(PAY_SUCCESS);
 				order.setModTime(DateTimeUtils.getCurrentTime());
 				order.setCompleteTime(DateTimeUtils.getCurrentTime());
-				order.setResultCode(status);
+				order.setResultCode(result);
 				doWhenPaySuccess(order);
 				bDeducted  = order.deduct(cp.getVolt());  // 是否扣量
+				if(!bDeducted){ // 不扣量 通知渠道
+//				notifyChannel(cp.getNotifyUrl(), order.getMobile(),order.getImsi(),order.getOrderId(), productCode, order.getPipleId(),"ok",cpparam);
+//				notifyChannel(cp.getNotifyUrl(), order, productCode, "ok");
+					notifyChannelAPI(cp.getNotifyUrl(),order,"ok");
+				}
 			}else {
 				order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
 				order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
 				order.setModTime(DateTimeUtils.getCurrentTime());
-				order.setResultCode(status);
+				order.setResultCode(result);
 			}
 			SaveOrderUpdate(order);
-			if(!bDeducted){ // 不扣量 通知渠道
-//				notifyChannel(cp.getNotifyUrl(), order.getMobile(),order.getImsi(),order.getOrderId(), productCode, order.getPipleId(),"ok",cpparam);
-//				notifyChannel(cp.getNotifyUrl(), order, productCode, "ok");
-				notifyChannelAPI(cp.getNotifyUrl(),order,"ok");
-			}
+			return "ok";
+		}else{
+			return "order not exist";
 		}
-		return "ok";
+
 	}
 	
 	@Override

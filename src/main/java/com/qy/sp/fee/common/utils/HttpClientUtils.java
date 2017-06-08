@@ -122,6 +122,45 @@ public class HttpClientUtils {
 		HttpPost httpPost = new HttpPost(url);
 		httpPost.setHeader("Accept", "application/json");
 		httpPost.setHeader("Content-Type", "application/json;charset="+encode+"");
+		httpPost.setHeader("Authorization", "appKey=\"8fa68f67a6e35b462c676be1b67d74d1992176a3\",token=\"413979888dfa2fe6d38b5ea8e2f4117f453c1276\"");
+
+		StringEntity entity = new StringEntity(json,encode);
+		httpPost.setEntity(entity);
+		CloseableHttpResponse response = httpclient.execute(httpPost);
+		String content = null;
+		try {
+			HttpEntity entity2 = response.getEntity();
+			// do something useful with the response body
+			content = getContent(response,encode);
+			// and ensure it is fully consumed
+			EntityUtils.consume(entity2);
+		} finally {
+			response.close();
+		}
+		return content;
+	}
+
+	/**
+	 * 发送验证信息HTTP请求
+	 *
+	 * @param url  请求地址
+	 * @param json 请求数据JSON格式
+	 * @throws Exception
+	 */
+	public static String doAuthPost(String url, String json,Map<String, String> authMap, String encode) throws Exception {
+		CloseableHttpClient httpclient = bulidHttpClient();
+
+		HttpPost httpPost = new HttpPost(url);
+		httpPost.setHeader("Accept", "application/json");
+		httpPost.setHeader("Content-Type", "application/json;charset="+encode+"");
+		StringBuffer buffer = new StringBuffer();
+		for (String key : authMap.keySet()) {
+			buffer.append(key).append("=\"").append(authMap.get(key)).append("\"").append(",");
+		}
+		if(buffer.toString().endsWith(",")){
+			buffer.deleteCharAt(buffer.length()-1);
+		}
+		httpPost.setHeader("Authorization", buffer.toString());
 
 		StringEntity entity = new StringEntity(json,encode);
 		httpPost.setEntity(entity);
