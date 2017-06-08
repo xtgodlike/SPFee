@@ -49,6 +49,21 @@ public class TPipleDao extends BaseDao {
     	return tPiple;
     }
 
+	public TPiple selectByPipleKey(String pipleKey){
+		TPiple tPiple = null;
+		String redisKey = pipleKey;
+		String value = redisDao.get(KEY_CACHE_TPIPLE, redisKey);
+		if(StringUtil.isEmpty(value)){
+			tPiple = pipleDao.selectByPipleKey(pipleKey);
+			if(tPiple != null){
+				redisDao.put(KEY_CACHE_TPIPLE, redisKey, JsonUtils.bean2Json(tPiple));
+			}
+		}else{
+			tPiple = JsonUtils.json2Bean(value, TPiple.class);
+		}
+		return tPiple;
+	}
+
     public int updateByPrimaryKeySelective(TPiple record){
     	return pipleDao.updateByPrimaryKeySelective(record);
     }

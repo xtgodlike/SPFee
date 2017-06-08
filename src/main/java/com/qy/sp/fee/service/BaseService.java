@@ -112,6 +112,7 @@ public class BaseService {
 	public BaseResult accessVerify(BaseChannelRequest req){
 		return accessVerify(req,req.getPipleId());
 	}
+
 	public BaseResult accessVerify(BaseChannelRequest req,String pipleId){
 		BaseResult result = null;
 		TChannel tChannel =  tChannelDao.selectByApiKey(req.getApiKey());
@@ -817,7 +818,6 @@ public class BaseService {
 	 * @param order
 	 * @param spnumber
 	 * @param status
-	 * @param extData
 	 */
 	public String notifyChannel(String url,TOrder order,String spnumber,String status){
 		String rst = "";
@@ -861,6 +861,42 @@ public class BaseService {
 		return "ok";
 		
 	}
+
+	/***
+	 * API方式交易同步
+	 * 同步参数：orderId（订单号）,mobile（手机号）,status（状态）,amout（金额）,productCode（产品代码）,pipleKey（业务代码）,apiKey（渠道代码）,imsi,extData
+	 * @param url
+	 * @param order
+	 * @param status
+	 */
+	public String notifyChannelAPIForKey(String url,TOrder order,String status){
+		String rst = "";
+		try {
+			String param = "orderId="+order.getOrderId()+"&mobile="+order.getMobile()+"&status="+status
+					+"&amount="+order.getAmount().doubleValue();
+			TProduct product = tProductDao.selectByPrimaryKey(order.getProductId());
+			TPiple tPiple = tPipleDao.selectByPrimaryKey(order.getPipleId());
+			TChannel tChannel = tChannelDao.selectByPrimaryKey(order.getChannelId());
+			param += "&productCode="+product.getProductCode()+"&pipleKey="+tPiple.getPipleNumber()+"&apiKey="+tChannel.getApiKey();
+			if(!StringUtil.isEmpty(order.getImsi())){
+				param += "&imsi="+order.getImsi();
+			}
+			if(!StringUtil.isEmpty(order.getExtData())){
+				param += "&extData="+StringUtil.urlEncodeWithUtf8(order.getExtData());
+			}
+			String ackUrl = url+"?"+param;
+			log.info("notifyChannelSMS sendToChannel:"+this.getClass().getName()+" ackUrl:" + ackUrl);
+			statistics(STEP_PAY_PLATFORM_TO_CHANNEL, order.getGroupId(),ackUrl);
+			rst = HttpClientUtils.doGet(ackUrl, "UTF-8");
+			log.info("notifyChannelSMS getFromChannel= " + rst + " ,orderId="+order.getOrderId());
+			statistics(STEP_PAY_CHANNEL_TO_PLATFORM, order.getGroupId(),rst);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return rst;
+	}
+
+
 	/***
 	 * API方式交易同步
 	 * 同步参数：orderId（订单号）,mobile（手机号）,status（状态）,amout（金额）,productCode（产品代码）,pipleId（业务ID）,apiKey（渠道代码）,imsi,extData

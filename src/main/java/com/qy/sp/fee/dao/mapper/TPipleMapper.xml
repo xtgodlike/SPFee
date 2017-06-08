@@ -46,6 +46,14 @@
     from t_piple
     where PIPLE_ID = #{pipleId,jdbcType=VARCHAR}
   </select>
+
+  <select id="selectByPipleKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_piple
+    where PIPLE_NUMBER = #{pipleKey,jdbcType=VARCHAR}
+  </select>
+
     <select id="selectPipleByFilterKey" resultMap="TPipleApply" parameterType="com.qy.sp.fee.dto.TPipleFilterKey" >
    	SELECT t3.*,t1.PRIORITY,t2.product_id FROM(
 	SELECT piple_id,PRIORITY FROM t_piple_province WHERE province_id= #{provinceId,jdbcType=VARCHAR} AND OP_STATUS=1

@@ -19,6 +19,8 @@ public interface PipleDao {
 
     TPiple selectByPrimaryKey(String pipleId);
 
+    TPiple selectByPipleKey(String pipleKey);
+
     int updateByPrimaryKeySelective(TPiple record);
 
     int updateByPrimaryKey(TPiple record);
