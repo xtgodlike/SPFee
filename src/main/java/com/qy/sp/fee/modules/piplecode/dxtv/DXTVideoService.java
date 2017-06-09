@@ -222,7 +222,7 @@ public class DXTVideoService extends ChannelService{
 				if(!bDeducted){ // 不扣量 通知渠道
 //				notifyChannel(cp.getNotifyUrl(), order.getMobile(),order.getImsi(),order.getOrderId(), productCode, order.getPipleId(),"ok",cpparam);
 //				notifyChannel(cp.getNotifyUrl(), order, productCode, "ok");
-					notifyChannelAPI(cp.getNotifyUrl(),order,"ok");
+					notifyChannelAPIForKey(cp.getNotifyUrl(),order,"ok");
 				}
 			}else {
 				order.setOrderStatus(GlobalConst.OrderStatus.FAIL);

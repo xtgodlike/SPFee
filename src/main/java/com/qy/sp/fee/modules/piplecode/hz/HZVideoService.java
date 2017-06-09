@@ -37,7 +37,30 @@ public class HZVideoService extends ChannelService{
 	public static Map<Integer,String> provinceMap = new HashMap<Integer, String>();
 	static {
 		provinceMap.put(1,"s10");
-
+		provinceMap.put(2,"s22");
+		provinceMap.put(9,"s21");
+		provinceMap.put(22,"s23");
+		provinceMap.put(3,"s311");
+		provinceMap.put(14,"s791");
+		provinceMap.put(15,"s531");
+		provinceMap.put(4,"s351");
+		provinceMap.put(5,"s471");
+		provinceMap.put(16,"s371");
+		provinceMap.put(6,"s24");
+		provinceMap.put(17,"s27");
+		provinceMap.put(7,"s431");
+		provinceMap.put(18,"s731");
+		provinceMap.put(8,"s451");
+		provinceMap.put(19,"s20");
+		provinceMap.put(10,"s25");
+		provinceMap.put(20,"s771");
+		provinceMap.put(21,"s898");
+		provinceMap.put(23,"s28");
+		provinceMap.put(11,"s571");
+		provinceMap.put(24,"s851");
+		provinceMap.put(12,"s551");
+		provinceMap.put(25,"s871");
+		provinceMap.put(13,"s591");
 	}
 
 	@Override
@@ -110,7 +133,7 @@ public class HZVideoService extends ChannelService{
 //			params.put("imei", order.getImei());
 //			params.put("cp_param", order.getOrderId());  // 我方orderId
 			String provinceCode = provinceMap.get(provinceId);
-			String reqUrl = piple.getPipleUrlA()+"?"+"svckey="+piple.getPipleAuthA()+"&imsi="+order.getImsi()+"&imei="+order.getImei()
+			String reqUrl = piple.getPipleUrlA()+"?"+"svckey="+pipleProduct.getPipleProductCode()+"&imsi="+order.getImsi()+"&imei="+order.getImei()
 					+"&ua="+order.getUa()+"&province="+provinceCode+"&cooperid="+order.getOrderId();
 			statistics(STEP_GET_SMS_PLATFORM_TO_BASE, groupId,reqUrl);
 //			String pipleResult = HttpClientUtils.doPost(piple.getPipleUrlA(),params,HttpClientUtils.UTF8);
@@ -129,7 +152,6 @@ public class HZVideoService extends ChannelService{
 				String cooperid = null;   // 透传参数
 				if(jsonObj.has("code") ){
 					code = jsonObj.getString("code");
-					codemsg = jsonObj.getString("codemsg");
 					if(RES_SUCCESS.equals(code)){ // 返回成功
 						transactionid = jsonObj.getString("transactionid");
 						shortcode = jsonObj.getString("shortcode");
@@ -163,7 +185,7 @@ public class HZVideoService extends ChannelService{
 						order.setModTime(DateTimeUtils.getCurrentTime());
 						SaveOrderUpdate(order);
 						result.put("resultCode", GlobalConst.Result.ERROR);
-						result.put("resultMsg","请求失败:"+code+codemsg);
+						result.put("resultMsg","请求失败:"+code);
 						statistics(STEP_BACK_SMS_PLATFORM_TO_CHANNEL, groupId, result.toString());
 						return result;
 					}
@@ -238,7 +260,7 @@ public class HZVideoService extends ChannelService{
 				order.setResultCode(result);
 			}
 			SaveOrderUpdate(order);
-			return "ok";
+			return "{\"status\": 200}";
 		}else{
 			return "order not exist";
 		}
