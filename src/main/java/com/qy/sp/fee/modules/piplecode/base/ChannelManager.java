@@ -32,17 +32,17 @@ public class ChannelManager {
 		channelServiceMap.remove(pipleId);
 	}
 	public JSONObject fireGetSMS(JSONObject requestObject) throws Exception{
-		String pipleId = requestObject.optString("pipleId");
-		if(channelServiceMap.containsKey(pipleId)){
-			ChannelService service = channelServiceMap.get(pipleId);
+		String pipleKey = requestObject.optString("pipleKey");
+		if(channelServiceMap.containsKey(pipleKey)){
+			ChannelService service = channelServiceMap.get(pipleKey);
 			return service.processGetSMS(requestObject);
 		}
 		return getErrorResult();
 	}
 	public JSONObject fireVertifySMS(JSONObject requestObject) throws Exception{
-		String pipleId = requestObject.optString("pipleId");
-		if(channelServiceMap.containsKey(pipleId)){
-			ChannelService service = channelServiceMap.get(pipleId);
+		String pipleKey = requestObject.optString("pipleKey");
+		if(channelServiceMap.containsKey(pipleKey)){
+			ChannelService service = channelServiceMap.get(pipleKey);
 			return service.processVertifySMS(requestObject);
 		}
 		return getErrorResult();

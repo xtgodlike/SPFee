@@ -41,6 +41,7 @@ public abstract class ChannelService extends BaseService {
 		}
 		if(StringUtil.isNotEmptyString(getPipleKey())){
 			ChannelManager.getInstance().putSmsService(getPipleKey(), this);
+			ChannelManager.getInstance().putChannelService(getPipleKey(), this);
 		}
 	}
 	

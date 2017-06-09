@@ -29,6 +29,12 @@ public class DXTVideoService extends ChannelService{
 	public String getPipleId() {
 		return "14958555721785335696481";
 	}
+
+	@Override
+	public String getPipleKey() {
+		return "PM1065";
+	}
+
 	@Override
 	public JSONObject processGetSMS(JSONObject requestBody) throws Exception {
 		log.info("DXTVideoService requestBody:"+requestBody);
@@ -37,11 +43,11 @@ public class DXTVideoService extends ChannelService{
 		String apiKey = requestBody.optString("apiKey");
 		
 		String mobile = requestBody.optString("mobile");
-		String pipleId = requestBody.optString("pipleId");
+		String pipleKey = requestBody.optString("pipleKey");
 		String imsi = requestBody.optString("imsi");
 		String imei = requestBody.optString("imei");
 		String extData = requestBody.optString("extData");
-		if(StringUtil.isEmptyString(productCode) || StringUtil.isEmptyString(apiKey)   || StringUtil.isEmpty(pipleId) || StringUtil.isEmpty(imsi) || StringUtil.isEmpty(mobile)){
+		if(StringUtil.isEmptyString(productCode) || StringUtil.isEmptyString(apiKey)   || StringUtil.isEmpty(pipleKey) || StringUtil.isEmpty(imsi) || StringUtil.isEmpty(mobile)){
 			result.put("resultCode",GlobalConst.CheckResult.MUST_PARAM_ISNULL+"");
 			result.put("resultMsg",GlobalConst.CheckResultDesc.message.get(GlobalConst.CheckResult.MUST_PARAM_ISNULL));
 			return result;
@@ -52,6 +58,8 @@ public class DXTVideoService extends ChannelService{
 			req.setProductCode(productCode);
 			req.setMobile(mobile);
 			// 调用合法性校验
+			TPiple tPiple = tPipleDao.selectByPipleKey(pipleKey);
+			String pipleId = tPiple==null?"":tPiple.getPipleId();
 			BaseResult bResult = this.accessVerify(req,pipleId);
 			if(bResult!=null){// 返回不为空则校验不通过
 				result.put("resultCode",bResult.getResultCode());
