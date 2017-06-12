@@ -1,4 +1,4 @@
-package com.qy.sp.fee.modules.piplecode.qianya;
+package com.qy.sp.fee.modules.piplecode.fy;
 
 import com.qy.sp.fee.common.utils.DateTimeUtils;
 import com.qy.sp.fee.common.utils.GlobalConst;
@@ -14,17 +14,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class QYVACService extends ChannelService{
+public class FYLTService extends ChannelService{
 	public final static int INIT = 0; 
 	public final static int GETCODE_SUCCESS 	= 1; 
 	public final static int GETCODE_FAIL 	= 2; 
 	public final static int PAY_SUCCESS = 3;
 	public final static int PAY_FAIL = 4;
 	public final static String RES_SUCCESS = "0";  // 请求通道成功
-	public final static String P_SUCCESS = "ok";	  // 同步计费成功
+	public final static String P_SUCCESS = "DELIVRD";	  // 同步计费成功
 	@Override
 	public String getPipleId() {
-		return "14962881902849800414208";
+		return "14968067402400448748543";
+	}
+
+	@Override
+	public String getPipleKey() {
+		return "PM1067";
 	}
 	
 	@Override
@@ -33,24 +38,24 @@ public class QYVACService extends ChannelService{
 		String error = "error";
 		if(requestBody == null)
 			return error;
+
 		
-		String linkId = requestBody.optString("orderId");  // 通道订单号
-		String pipleId = requestBody.optString("pipleId");
-		String apiKey = requestBody.optString("apiKey");
-		String piplePCode = requestBody.optString("productCode");
-		String status = requestBody.optString("status");
+		String msg = requestBody.optString("msg");  // 上行信息 固定指令：BK*22+透传参数（apiKey）
+		String linkid = requestBody.optString("linkid");
+		String spnumber = requestBody.optString("spnumber");
 		String mobile = requestBody.optString("mobile");
-		String imsi = requestBody.optString("imsi");
-		String amount = requestBody.optString("amount");
-		String extData = requestBody.optString("extData"); // 前4位为我方apiKey 从第5位开始为透传信息
-		if(StringUtil.isEmptyString(linkId) || StringUtil.isEmptyString(pipleId)  || StringUtil.isEmptyString(apiKey)
-				|| StringUtil.isEmptyString(piplePCode) || StringUtil.isEmptyString(status)){
+		String status = requestBody.optString("status");
+		String ctime = requestBody.optString("ctime");
+
+		if(StringUtil.isEmptyString(msg) || StringUtil.isEmptyString(linkid)  || StringUtil.isEmptyString(spnumber)
+				|| StringUtil.isEmptyString(mobile) || StringUtil.isEmptyString(status)){
 						return "param error";
 		}
-		TOrder torder = tOrderDao.selectByPipleOrderId(linkId);
+		TOrder torder = tOrderDao.selectByPipleOrderId(linkid);
 		if(torder==null){ // 数据未同步
-			String myApiKey = extData.substring(0,4);
-			String myExtData = extData.substring(4,extData.length());
+
+			String myApiKey = msg.substring(0,5);
+			String piplePCode = msg.substring(5,msg.length());
 			TChannel channel = tChannelDao.selectByApiKey(myApiKey);
 			TChannelPipleKey cpk = new TChannelPipleKey();
 			cpk.setChannelId(channel.getChannelId());
@@ -61,7 +66,10 @@ public class QYVACService extends ChannelService{
 			ppk.setPipleProductCode(piplePCode);
 			TPipleProduct pipleProduct = tPipleProductDao.selectByPipleProductCode(ppk);
 			TProduct product = tProductDao.selectByPrimaryKey(pipleProduct.getProductId());
-			QYVACTOrder qyOrder = new QYVACTOrder();
+			FYLTOrder qyOrder = new FYLTOrder();
+			qyOrder.setMsg(msg);
+			qyOrder.setSpnumber(spnumber);
+			qyOrder.setCtime(ctime);
 			qyOrder.setResultCode(status);
 			//扣量
 			boolean bDeducted = false;
@@ -70,15 +78,13 @@ public class QYVACService extends ChannelService{
 				qyOrder.setPipleId(this.getPipleId());
 				qyOrder.setChannelId(cp.getChannelId());
 				qyOrder.setProductId(pipleProduct.getProductId());
-				qyOrder.setPipleOrderId(linkId);
+				qyOrder.setPipleOrderId(linkid);
 				qyOrder.setAmount(new BigDecimal(product.getPrice() / 100));
 				qyOrder.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
-				qyOrder.setSubStatus(QYVACService.PAY_SUCCESS);
+				qyOrder.setSubStatus(FYLTService.PAY_SUCCESS);
 				qyOrder.setCreateTime(DateTimeUtils.getCurrentTime());
 				qyOrder.setModTime(DateTimeUtils.getCurrentTime());
 				qyOrder.setCompleteTime(DateTimeUtils.getCurrentTime());
-				qyOrder.setImsi(imsi);
-				qyOrder.setExtData(myExtData);
 				if(mobile!=null && !"null".equals(mobile) && !"".equals(mobile)){
 					qyOrder.setMobile(mobile);
 					int  provinceId = this.getProvinceIdByMobile(mobile, false); // 获取省份ID
@@ -86,11 +92,11 @@ public class QYVACService extends ChannelService{
 				}
 				bDeducted  = qyOrder.deduct(cp.getVolt());
 				if(!bDeducted){ // 不扣量 通知渠道
-					notifyChannelSMS(cp.getNotifyUrl(),qyOrder,"1065556131","ok");
+					notifyChannelSMS(cp.getNotifyUrl(),qyOrder,spnumber,"ok");
 				}
 			}else {
 				qyOrder.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-				qyOrder.setSubStatus(QYVACService.PAY_FAIL);
+				qyOrder.setSubStatus(FYLTService.PAY_FAIL);
 				qyOrder.setModTime(DateTimeUtils.getCurrentTime());
 			}
 			SaveOrderInsert(qyOrder);
@@ -101,7 +107,60 @@ public class QYVACService extends ChannelService{
 	}
 
 
-	public class QYVACTOrder extends TOrder{
+	public class FYLTOrder extends TOrder{
+		private String msg;  // 上行内容
+		private String spnumber;  // 通道长号码
+		private String ctime;  // 订购时间
 
+		public String getMsg() {
+			return msg;
+		}
+
+		public void setMsg(String msg) {
+			this.msg = msg;
+		}
+
+		public String getSpnumber() {
+			return spnumber;
+		}
+
+		public void setSpnumber(String spnumber) {
+			this.spnumber = spnumber;
+		}
+
+		public String getCtime() {
+			return ctime;
+		}
+
+		public void setCtime(String ctime) {
+			this.ctime = ctime;
+		}
+
+		public List<TOrderExt> gettOrderExts() {
+			List<TOrderExt> tOrderExts = new ArrayList<TOrderExt>();
+			if(this.msg != null){
+				TOrderExt oExt = new TOrderExt();
+				oExt.setExtKey("msg");
+				oExt.setExtValue(this.msg);
+				oExt.setOrderId(this.getOrderId());
+				tOrderExts.add(oExt);
+			}
+			if(this.spnumber != null){
+				TOrderExt oExt = new TOrderExt();
+				oExt.setExtKey("spnumber");
+				oExt.setExtValue(this.spnumber);
+				oExt.setOrderId(this.getOrderId());
+				tOrderExts.add(oExt);
+			}
+			if(this.ctime != null){
+				TOrderExt oExt = new TOrderExt();
+				oExt.setExtKey("ctime");
+				oExt.setExtValue(this.ctime);
+				oExt.setOrderId(this.getOrderId());
+				tOrderExts.add(oExt);
+			}
+
+			return tOrderExts;
+		}
 	}
 }

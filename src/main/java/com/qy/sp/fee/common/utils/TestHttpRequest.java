@@ -15,7 +15,7 @@ public class TestHttpRequest {
 	 	parameters.put("apiKey", "3034");
 //	 	parameters.put("apiPwd", "B97FED4E9994E33353DFAA8A31428E11BD7AE59");
 //		parameters.put("pipleId", "14958555721785335696481");
-	 parameters.put("pipleKey", "PM1068");
+	 	parameters.put("pipleKey", "PM1065");
 //		parameters.put("appId", "a102");
 		parameters.put("productCode", "P01000");
 		parameters.put("mobile", "13636191205");
