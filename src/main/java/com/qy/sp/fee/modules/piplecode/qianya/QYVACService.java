@@ -50,7 +50,9 @@ public class QYVACService extends ChannelService{
 		TOrder torder = tOrderDao.selectByPipleOrderId(linkId);
 		if(torder==null){ // 数据未同步
 			try {
-				statistics(STEP_PAY_BASE_TO_PLATFORM, torder.getGroupId(), requestBody.toString());
+				QYVACTOrder qyOrder = new QYVACTOrder();
+				qyOrder.setGroupId(KeyHelper.createKey());
+				statistics(STEP_PAY_BASE_TO_PLATFORM, qyOrder.getGroupId(), requestBody.toString());
 				String myApiKey = extData.substring(0,4);
 				String myExtData = extData.substring(4,extData.length());
 				TChannel channel = tChannelDao.selectByApiKey(myApiKey);
@@ -63,7 +65,6 @@ public class QYVACService extends ChannelService{
 				ppk.setPipleProductCode(piplePCode);
 				TPipleProduct pipleProduct = tPipleProductDao.selectByPipleProductCode(ppk);
 				TProduct product = tProductDao.selectByPrimaryKey(pipleProduct.getProductId());
-				QYVACTOrder qyOrder = new QYVACTOrder();
 				qyOrder.setResultCode(status);
 				//扣量
 				boolean bDeducted = false;

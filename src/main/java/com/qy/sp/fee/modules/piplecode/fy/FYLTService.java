@@ -54,7 +54,9 @@ public class FYLTService extends ChannelService{
 		TOrder torder = tOrderDao.selectByPipleOrderId(linkid);
 		if(torder==null){ // 数据未同步
 			try {
-				statistics(STEP_PAY_BASE_TO_PLATFORM, torder.getGroupId(), requestBody.toString());
+				FYLTOrder qyOrder = new FYLTOrder();
+				qyOrder.setGroupId(KeyHelper.createKey());
+				statistics(STEP_PAY_BASE_TO_PLATFORM, qyOrder.getGroupId(), requestBody.toString());
 				String piplePCode = msg.substring(0,5);
 				String myApiKey = msg.substring(5,msg.length());
 				TChannel channel = tChannelDao.selectByApiKey(myApiKey);
@@ -67,7 +69,7 @@ public class FYLTService extends ChannelService{
 				ppk.setPipleProductCode(piplePCode);
 				TPipleProduct pipleProduct = tPipleProductDao.selectByPipleProductCode(ppk);
 				TProduct product = tProductDao.selectByPrimaryKey(pipleProduct.getProductId());
-				FYLTOrder qyOrder = new FYLTOrder();
+//				FYLTOrder qyOrder = new FYLTOrder();
 				qyOrder.setMsg(msg);
 				qyOrder.setSpnumber(spnumber);
 				qyOrder.setCtime(ctime);
@@ -75,7 +77,7 @@ public class FYLTService extends ChannelService{
 				//扣量
 				boolean bDeducted = false;
 				if(P_SUCCESS.equals(status)){
-                    qyOrder.setOrderId( KeyHelper.createKey());
+                    qyOrder.setOrderId(KeyHelper.createKey());
                     qyOrder.setPipleId(this.getPipleId());
                     qyOrder.setChannelId(cp.getChannelId());
                     qyOrder.setProductId(pipleProduct.getProductId());
