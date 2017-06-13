@@ -198,40 +198,46 @@ public class DXTVideoService extends ChannelService{
 		String tran_id = requestBody.optString("tran_id");
 		TOrder order = tOrderDao.selectByPrimaryKey(cp_param);
 		if(order!=null ){ // 同步数据正确
-			order.setPipleOrderId(tran_id); // 通道订单号
-			statistics(STEP_PAY_BASE_TO_PLATFORM, order.getGroupId(), requestBody.toString());
-			TChannelPipleKey pkey = new TChannelPipleKey();
-			pkey.setChannelId(order.getChannelId());
-			pkey.setPipleId(order.getPipleId());
-			TChannelPiple cp =  tChannelPipleDao.selectByPrimaryKey(pkey);
-			if(cp == null){
-				return "channel error";
+			try {
+				order.setPipleOrderId(tran_id); // 通道订单号
+				statistics(STEP_PAY_BASE_TO_PLATFORM, order.getGroupId(), requestBody.toString());
+				TChannelPipleKey pkey = new TChannelPipleKey();
+				pkey.setChannelId(order.getChannelId());
+				pkey.setPipleId(order.getPipleId());
+				TChannelPiple cp =  tChannelPipleDao.selectByPrimaryKey(pkey);
+				if(cp == null){
+                    return "channel error";
+                }
+				TProduct tProduct = this.tProductDao.selectByPrimaryKey(order.getProductId());
+				String productCode = tProduct.getProductCode();
+				//扣量
+				boolean bDeducted = false;
+				if(P_SUCCESS.equals(result)){
+                    order.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
+                    order.setSubStatus(PAY_SUCCESS);
+                    order.setModTime(DateTimeUtils.getCurrentTime());
+                    order.setCompleteTime(DateTimeUtils.getCurrentTime());
+                    order.setResultCode(result);
+                    doWhenPaySuccess(order);
+                    bDeducted  = order.deduct(cp.getVolt());  // 是否扣量
+                    if(!bDeducted){ // 不扣量 通知渠道
+    //				notifyChannel(cp.getNotifyUrl(), order.getMobile(),order.getImsi(),order.getOrderId(), productCode, order.getPipleId(),"ok",cpparam);
+    //				notifyChannel(cp.getNotifyUrl(), order, productCode, "ok");
+                        notifyChannelAPIForKey(cp.getNotifyUrl(),order,"ok");
+                    }
+                }else {
+                    order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
+                    order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
+                    order.setModTime(DateTimeUtils.getCurrentTime());
+                    order.setResultCode(result);
+                }
+				SaveOrderUpdate(order);
+				return "ok";
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.info("DXTVideoService同步处理异常："+e.getMessage());
+				return "sync error";
 			}
-			TProduct tProduct = this.tProductDao.selectByPrimaryKey(order.getProductId());
-			String productCode = tProduct.getProductCode();
-			//扣量
-			boolean bDeducted = false;
-			if(P_SUCCESS.equals(result)){
-				order.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
-				order.setSubStatus(PAY_SUCCESS);
-				order.setModTime(DateTimeUtils.getCurrentTime());
-				order.setCompleteTime(DateTimeUtils.getCurrentTime());
-				order.setResultCode(result);
-				doWhenPaySuccess(order);
-				bDeducted  = order.deduct(cp.getVolt());  // 是否扣量
-				if(!bDeducted){ // 不扣量 通知渠道
-//				notifyChannel(cp.getNotifyUrl(), order.getMobile(),order.getImsi(),order.getOrderId(), productCode, order.getPipleId(),"ok",cpparam);
-//				notifyChannel(cp.getNotifyUrl(), order, productCode, "ok");
-					notifyChannelAPIForKey(cp.getNotifyUrl(),order,"ok");
-				}
-			}else {
-				order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-				order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
-				order.setModTime(DateTimeUtils.getCurrentTime());
-				order.setResultCode(result);
-			}
-			SaveOrderUpdate(order);
-			return "ok";
 		}else{
 			return "order not exist";
 		}

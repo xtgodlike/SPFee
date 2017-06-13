@@ -49,52 +49,59 @@ public class QYVACService extends ChannelService{
 		}
 		TOrder torder = tOrderDao.selectByPipleOrderId(linkId);
 		if(torder==null){ // 数据未同步
-			String myApiKey = extData.substring(0,4);
-			String myExtData = extData.substring(4,extData.length());
-			TChannel channel = tChannelDao.selectByApiKey(myApiKey);
-			TChannelPipleKey cpk = new TChannelPipleKey();
-			cpk.setChannelId(channel.getChannelId());
-			cpk.setPipleId(this.getPipleId());
-			TChannelPiple cp = tChannelPipleDao.selectByPrimaryKey(cpk);
-			TPipleProduct ppk = new TPipleProduct();
-			ppk.setPipleId(this.getPipleId());
-			ppk.setPipleProductCode(piplePCode);
-			TPipleProduct pipleProduct = tPipleProductDao.selectByPipleProductCode(ppk);
-			TProduct product = tProductDao.selectByPrimaryKey(pipleProduct.getProductId());
-			QYVACTOrder qyOrder = new QYVACTOrder();
-			qyOrder.setResultCode(status);
-			//扣量
-			boolean bDeducted = false;
-			if(P_SUCCESS.equals(status)){
-				qyOrder.setOrderId( KeyHelper.createKey());
-				qyOrder.setPipleId(this.getPipleId());
-				qyOrder.setChannelId(cp.getChannelId());
-				qyOrder.setProductId(pipleProduct.getProductId());
-				qyOrder.setPipleOrderId(linkId);
-				qyOrder.setAmount(new BigDecimal(product.getPrice() / 100));
-				qyOrder.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
-				qyOrder.setSubStatus(QYVACService.PAY_SUCCESS);
-				qyOrder.setCreateTime(DateTimeUtils.getCurrentTime());
-				qyOrder.setModTime(DateTimeUtils.getCurrentTime());
-				qyOrder.setCompleteTime(DateTimeUtils.getCurrentTime());
-				qyOrder.setImsi(imsi);
-				qyOrder.setExtData(myExtData);
-				if(mobile!=null && !"null".equals(mobile) && !"".equals(mobile)){
-					qyOrder.setMobile(mobile);
-					int  provinceId = this.getProvinceIdByMobile(mobile, false); // 获取省份ID
-					qyOrder.setProvinceId(provinceId);
-				}
-				bDeducted  = qyOrder.deduct(cp.getVolt());
-				if(!bDeducted){ // 不扣量 通知渠道
-					notifyChannelSMS(cp.getNotifyUrl(),qyOrder,"1065556131","ok");
-				}
-			}else {
-				qyOrder.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-				qyOrder.setSubStatus(QYVACService.PAY_FAIL);
-				qyOrder.setModTime(DateTimeUtils.getCurrentTime());
+			try {
+				statistics(STEP_PAY_BASE_TO_PLATFORM, torder.getGroupId(), requestBody.toString());
+				String myApiKey = extData.substring(0,4);
+				String myExtData = extData.substring(4,extData.length());
+				TChannel channel = tChannelDao.selectByApiKey(myApiKey);
+				TChannelPipleKey cpk = new TChannelPipleKey();
+				cpk.setChannelId(channel.getChannelId());
+				cpk.setPipleId(this.getPipleId());
+				TChannelPiple cp = tChannelPipleDao.selectByPrimaryKey(cpk);
+				TPipleProduct ppk = new TPipleProduct();
+				ppk.setPipleId(this.getPipleId());
+				ppk.setPipleProductCode(piplePCode);
+				TPipleProduct pipleProduct = tPipleProductDao.selectByPipleProductCode(ppk);
+				TProduct product = tProductDao.selectByPrimaryKey(pipleProduct.getProductId());
+				QYVACTOrder qyOrder = new QYVACTOrder();
+				qyOrder.setResultCode(status);
+				//扣量
+				boolean bDeducted = false;
+				if(P_SUCCESS.equals(status)){
+                    qyOrder.setOrderId( KeyHelper.createKey());
+                    qyOrder.setPipleId(this.getPipleId());
+                    qyOrder.setChannelId(cp.getChannelId());
+                    qyOrder.setProductId(pipleProduct.getProductId());
+                    qyOrder.setPipleOrderId(linkId);
+                    qyOrder.setAmount(new BigDecimal(product.getPrice() / 100));
+                    qyOrder.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
+                    qyOrder.setSubStatus(QYVACService.PAY_SUCCESS);
+                    qyOrder.setCreateTime(DateTimeUtils.getCurrentTime());
+                    qyOrder.setModTime(DateTimeUtils.getCurrentTime());
+                    qyOrder.setCompleteTime(DateTimeUtils.getCurrentTime());
+                    qyOrder.setImsi(imsi);
+                    qyOrder.setExtData(myExtData);
+                    if(mobile!=null && !"null".equals(mobile) && !"".equals(mobile)){
+                        qyOrder.setMobile(mobile);
+                        int  provinceId = this.getProvinceIdByMobile(mobile, false); // 获取省份ID
+                        qyOrder.setProvinceId(provinceId);
+                    }
+                    bDeducted  = qyOrder.deduct(cp.getVolt());
+                    if(!bDeducted){ // 不扣量 通知渠道
+                        notifyChannelSMS(cp.getNotifyUrl(),qyOrder,"1065556131","ok");
+                    }
+                }else {
+                    qyOrder.setOrderStatus(GlobalConst.OrderStatus.FAIL);
+                    qyOrder.setSubStatus(QYVACService.PAY_FAIL);
+                    qyOrder.setModTime(DateTimeUtils.getCurrentTime());
+                }
+				SaveOrderInsert(qyOrder);
+				return "ok";
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.info("QYVACService同步处理异常："+e.getMessage());
+				return "sync error";
 			}
-			SaveOrderInsert(qyOrder);
-			return "ok";
 		}else{
 			return "order Synchronized";
 		}
