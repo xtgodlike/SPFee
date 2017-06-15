@@ -53,9 +53,17 @@ public class QYVACService extends ChannelService{
 				QYVACTOrder qyOrder = new QYVACTOrder();
 				qyOrder.setGroupId(KeyHelper.createKey());
 				statistics(STEP_PAY_BASE_TO_PLATFORM, qyOrder.getGroupId(), requestBody.toString());
-				String myApiKey = extData.substring(0,4);
-				String myExtData = extData.substring(4,extData.length());
+				String[] extDataArr = extData.split("\\*"); // 数据格式 DC10*325081910320100*302230381
+				String myApiKey = null;
+				String myExtData = null;
+				if(!StringUtil.isEmpty(extDataArr[2]) && extDataArr[2].length() >= 4){
+					myApiKey = extDataArr[2].substring(4,8);
+					myExtData = extDataArr[2].substring(8,extDataArr[2].length());
+				}
 				TChannel channel = tChannelDao.selectByApiKey(myApiKey);
+				if(channel==null){
+					return "channel error";
+				}
 				TChannelPipleKey cpk = new TChannelPipleKey();
 				cpk.setChannelId(channel.getChannelId());
 				cpk.setPipleId(this.getPipleId());
