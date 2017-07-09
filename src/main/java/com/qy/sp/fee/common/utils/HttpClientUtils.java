@@ -122,7 +122,7 @@ public class HttpClientUtils {
 		HttpPost httpPost = new HttpPost(url);
 		httpPost.setHeader("Accept", "application/json");
 		httpPost.setHeader("Content-Type", "application/json;charset="+encode+"");
-		httpPost.setHeader("Authorization", "appKey=\"8fa68f67a6e35b462c676be1b67d74d1992176a3\",token=\"413979888dfa2fe6d38b5ea8e2f4117f453c1276\"");
+//		httpPost.setHeader("Authorization", "appKey=\"8fa68f67a6e35b462c676be1b67d74d1992176a3\",token=\"413979888dfa2fe6d38b5ea8e2f4117f453c1276\"");
 
 		StringEntity entity = new StringEntity(json,encode);
 		httpPost.setEntity(entity);
