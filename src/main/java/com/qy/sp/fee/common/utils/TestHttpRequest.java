@@ -52,9 +52,9 @@ public class TestHttpRequest {
 //	 	url = url+"&msg="+msg+"&ftime="+ftime;
 	 	try {// 139.196.27.18
 //	 		String result = HttpClientUtils.doPostp("http://localhost:8088/SPFee/piple/woshop/sync", "<callbackReq>测试</callbackReq>", HttpClientUtils.UTF8);
-//			String result = HttpClientUtils.doPost("http://120.26.53.235/SPFee/channel/getSms", parameters.toString(), HttpClientUtils.UTF8);
+			String result = HttpClientUtils.doPost("http://120.26.53.235/SPFee/channel/getSms", parameters.toString(), HttpClientUtils.UTF8);
 //	 		String result = HttpClientUtils.doPost("http://www.chinaunigame.net/spfee/channel/vertifySms", parameters.toString(), HttpClientUtils.UTF8);
-			String result = HttpClientUtils.doPost("http://localhost:8888/channel/getSms", parameters.toString(), HttpClientUtils.UTF8);
+//			String result = HttpClientUtils.doPost("http://localhost:8888/channel/getSms", parameters.toString(), HttpClientUtils.UTF8);
 //			String result = HttpClientUtils.doPost("http://localhost:8888/SPFee/channel/vertifySms", parameters.toString(), HttpClientUtils.UTF8);
 //			String result = HttpClientUtils.doPost("http://localhost:8888/SPFee/api/sdk/phone/getMongodbUserGroup", parameters.toString(), HttpClientUtils.UTF8);
 //			String result = HttpClientUtils.doGet(url, HttpClientUtils.UTF8);

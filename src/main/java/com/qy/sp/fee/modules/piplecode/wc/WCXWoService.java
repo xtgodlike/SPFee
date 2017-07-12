@@ -23,7 +23,7 @@ public class WCXWoService extends ChannelService{
 	public final static int PAY_SUCCESS = 3;
 	public final static int PAY_FAIL = 4;
 	public final static String RES_SUCCESS = "10000";  // 请求通道成功
-	public final static String P_SUCCESS = "succ";	  // 同步计费成功
+	public final static String P_SUCCESS = "10000";	  // 同步计费成功
 	private  Logger log = Logger.getLogger(WCXWoService.class);
 	@Override
 	public String getPipleId() {
@@ -39,11 +39,10 @@ public class WCXWoService extends ChannelService{
 	public JSONObject processGetSMS(JSONObject requestBody) throws Exception {
 		log.info("WCXWoService requestBody:"+requestBody);
 		JSONObject result = new JSONObject();
-		String productCode = requestBody.optString("productCode");
 		String apiKey = requestBody.optString("apiKey");
-		
-		String mobile = requestBody.optString("mobile");
 		String pipleKey = requestBody.optString("pipleKey");
+		String productCode = requestBody.optString("productCode");
+		String mobile = requestBody.optString("mobile");
 		String imsi = requestBody.optString("imsi");
 		String imei = requestBody.optString("imei");
 		String extData = requestBody.optString("extData");
@@ -96,9 +95,9 @@ public class WCXWoService extends ChannelService{
 			SaveOrderInsert(order);
 			result.put("orderId",order.getOrderId());
 
-			String reqUrl = piple.getPipleUrlA()+"?"+"cm="+piple.getPipleAuthA()+"&imsi="+order.getImsi()+"&imei="+order.getImei()
+			String reqUrl = piple.getPipleUrlA()+"?"+"channelId="+piple.getPipleAuthA()+"&cm="+piple.getPipleAuthB()+"&imsi="+order.getImsi()+"&imei="+order.getImei()
 					+"&mobile="+order.getMobile()+"&productId="+pipleProduct.getPipleProductCode()
-					+"&price="+tProduct.getPrice()+"channelId="+piple.getPipleAuthB()+"&exData="+order.getOrderId();
+					+"&price="+tProduct.getPrice()+"&exData="+order.getOrderId();
 			statistics(STEP_GET_SMS_PLATFORM_TO_BASE, groupId,reqUrl);
 //			String pipleResult = HttpClientUtils.doPost(piple.getPipleUrlA(),params,HttpClientUtils.UTF8);
 			String pipleResult = HttpClientUtils.doGet(reqUrl,HttpClientUtils.UTF8);
@@ -120,7 +119,7 @@ public class WCXWoService extends ChannelService{
 						port = jsonObj.getString("port");
 						smsType = jsonObj.getString("smsType");
 						orderId = jsonObj.getString("orderId");
-						//						 order.setPipleOrderId(billid);
+						//	order.setPipleOrderId(billid);
 						order.setSmsNumber1(port);
 						order.setSmsContent1(sms);
 						order.setResultCode(resultCode);
@@ -167,6 +166,8 @@ public class WCXWoService extends ChannelService{
 				SaveOrderUpdate(order);
 				result.put("resultCode",GlobalConst.Result.ERROR);
 				result.put("resultMsg","请求失败，接口异常");
+				statistics(STEP_BACK_SMS_PLATFORM_TO_CHANNEL, groupId, result.toString());
+				return result;
 			}
 		}
 	}
@@ -273,21 +274,24 @@ public class WCXWoService extends ChannelService{
 	
 	@Override
 	public String processPaySuccess(JSONObject requestBody) throws Exception {
-		logger.info("DXTVideoService 支付同步数据:"+requestBody);
+		logger.info("WCXWoService 支付同步数据:"+requestBody);
 		String error = "error";
 		if(requestBody==null || "".equals(requestBody) || "{}".equals(requestBody.toString())){
 			return error;
 		}
 		String imsi = requestBody.optString("imsi");
-		String qid = requestBody.optString("qid");
-		String subscribe_time = requestBody.optString("subscribe_time");
-		String cp_param = requestBody.optString("cp_param");  // 我方订单号
-		String result = requestBody.optString("result");
-		String tran_id = requestBody.optString("tran_id");
-		TOrder order = tOrderDao.selectByPrimaryKey(cp_param);
+		String mobile = requestBody.optString("mobile");
+		String productId = requestBody.optString("productId");
+		String price = requestBody.optString("price");
+		String timestamp = requestBody.optString("timestamp");
+		String exData = requestBody.optString("exData");  // 我方订单号
+		String orderId = requestBody.optString("orderId");
+		String province = requestBody.optString("province");
+		String resultCode = requestBody.optString("resultCode");
+
+		TOrder order = tOrderDao.selectByPipleOrderId(orderId);
 		if(order!=null ){ // 同步数据正确
 			try {
-				order.setPipleOrderId(tran_id); // 通道订单号
 				statistics(STEP_PAY_BASE_TO_PLATFORM, order.getGroupId(), requestBody.toString());
 				TChannelPipleKey pkey = new TChannelPipleKey();
 				pkey.setChannelId(order.getChannelId());
@@ -300,12 +304,12 @@ public class WCXWoService extends ChannelService{
 				String productCode = tProduct.getProductCode();
 				//扣量
 				boolean bDeducted = false;
-				if(P_SUCCESS.equals(result)){
+				if(P_SUCCESS.equals(resultCode)){
                     order.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
                     order.setSubStatus(PAY_SUCCESS);
                     order.setModTime(DateTimeUtils.getCurrentTime());
                     order.setCompleteTime(DateTimeUtils.getCurrentTime());
-                    order.setResultCode(result);
+                    order.setResultCode(resultCode);
                     doWhenPaySuccess(order);
                     bDeducted  = order.deduct(cp.getVolt());  // 是否扣量
                     if(!bDeducted){ // 不扣量 通知渠道
@@ -317,13 +321,13 @@ public class WCXWoService extends ChannelService{
                     order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
                     order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
                     order.setModTime(DateTimeUtils.getCurrentTime());
-                    order.setResultCode(result);
+                    order.setResultCode(resultCode);
                 }
 				SaveOrderUpdate(order);
 				return "ok";
 			} catch (Exception e) {
 				e.printStackTrace();
-				logger.info("DXTVideoService同步处理异常："+e.getMessage());
+				logger.info("WCXWoService同步处理异常："+e.getMessage());
 				return "sync error";
 			}
 		}else{

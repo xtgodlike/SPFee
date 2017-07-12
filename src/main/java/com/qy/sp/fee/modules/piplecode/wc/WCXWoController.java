@@ -12,20 +12,25 @@ import javax.annotation.Resource;
 public class WCXWoController {
 
 	@Resource
-	private WCXWoService dxTVideoService;
-	@RequestMapping(value = "/dxtv/sync" ,produces = {"application/json;charset=UTF-8"})
+	private WCXWoService wcxWoService;
+	@RequestMapping(value = "/wcwoshop/sync" ,produces = {"application/json;charset=UTF-8"})
 	@ResponseBody
-	public String channelRequest(String imsi,String qid,String subscribe_time,String cp_param,String result,String tran_id){
+	public String channelRequest(String imsi,String mobile,String productId,String price,String timestamp,
+								 String exData,String orderId,String province,String resultCode){
 		String resultMsg = "error";
 		try{
 			JSONObject bodyObject = new JSONObject();
 			bodyObject.put("imsi", imsi);
-			bodyObject.put("qid", qid);
-			bodyObject.put("subscribe_time", subscribe_time);
-			bodyObject.put("cp_param", cp_param);
-			bodyObject.put("result",result);
-			bodyObject.put("tran_id",tran_id);
-			resultMsg = dxTVideoService.processPaySuccess(bodyObject);
+			bodyObject.put("mobile", mobile);
+			bodyObject.put("productId", productId);
+			bodyObject.put("price", price);
+			bodyObject.put("timestamp",timestamp);
+			bodyObject.put("exData",exData);
+			bodyObject.put("orderId",orderId);
+			bodyObject.put("province",province);
+			bodyObject.put("resultCode",resultCode);
+
+			resultMsg = wcxWoService.processPaySuccess(bodyObject);
 		}
 		catch(Exception e){
 			e.printStackTrace();
