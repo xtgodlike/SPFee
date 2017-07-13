@@ -96,7 +96,7 @@ public class WCXWoService extends ChannelService{
 			result.put("orderId",order.getOrderId());
 
 			String reqUrl = piple.getPipleUrlA()+"?"+"channelId="+piple.getPipleAuthA()+"&cm="+piple.getPipleAuthB()+"&imsi="+order.getImsi()+"&imei="+order.getImei()
-					+"&mobile="+order.getMobile()+"&productId="+pipleProduct.getPipleProductCode()
+					+"&mobile="+order.getMobile()+"&productId="+piple.getPipleAuthC()
 					+"&price="+tProduct.getPrice()+"&exData="+order.getOrderId();
 			statistics(STEP_GET_SMS_PLATFORM_TO_BASE, groupId,reqUrl);
 //			String pipleResult = HttpClientUtils.doPost(piple.getPipleUrlA(),params,HttpClientUtils.UTF8);
@@ -180,7 +180,12 @@ public class WCXWoService extends ChannelService{
 			String apiKey = requestBody.optString("apiKey");
 			String orderId = requestBody.optString("orderId");
 			String verifyCode = requestBody.optString("verifyCode");
-
+			result.put("orderId",orderId);
+			if(StringUtil.isEmptyString(apiKey) || StringUtil.isEmptyString(orderId)   || StringUtil.isEmpty(verifyCode)) {
+				result.put("resultCode", GlobalConst.CheckResult.MUST_PARAM_ISNULL + "");
+				result.put("resultMsg", GlobalConst.CheckResultDesc.message.get(GlobalConst.CheckResult.MUST_PARAM_ISNULL));
+				return result;
+			}
 			TOrder tOrder = this.tOrderDao.selectByPrimaryKey(orderId);
 			if(tOrder==null){
 				result.put("resultCode",GlobalConst.CheckResult.ORDER_FAIL+"");
@@ -195,7 +200,6 @@ public class WCXWoService extends ChannelService{
 				TProduct tProduct = this.tProductDao.selectByPrimaryKey(tOrder.getProductId());
 				BaseChannelRequest req = new BaseChannelRequest();
 				req.setApiKey(apiKey);
-
 				req.setImsi(tOrder.getImsi());
 				req.setProductCode(tProduct.getProductCode());
 				BaseResult bResult = this.accessVerify(req, getPipleId());
@@ -300,8 +304,7 @@ public class WCXWoService extends ChannelService{
 				if(cp == null){
                     return "channel error";
                 }
-				TProduct tProduct = this.tProductDao.selectByPrimaryKey(order.getProductId());
-				String productCode = tProduct.getProductCode();
+
 				//扣量
 				boolean bDeducted = false;
 				if(P_SUCCESS.equals(resultCode)){
