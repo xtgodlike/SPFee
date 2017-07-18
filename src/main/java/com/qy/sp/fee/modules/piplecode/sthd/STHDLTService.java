@@ -65,12 +65,8 @@ public class STHDLTService extends ChannelService{
 				}else {
 					channelPiple = channelPiples.get(0);
 				}
-				// 固定计费点
-				TPipleProduct ppk = new TPipleProduct();
-				ppk.setPipleId(this.getPipleId());
-				ppk.setPipleProductCode("10");
-				TPipleProduct pipleProduct = tPipleProductDao.selectByPipleProductCode(ppk);
-				TProduct product = tProductDao.selectByPrimaryKey(pipleProduct.getProductId());
+				// 固定计费点 1元
+				TProduct product = tProductDao.selectByPrimaryKey("1");
 				qyOrder.setResultCode(stat);
 				//扣量
 				boolean bDeducted = false;
@@ -78,7 +74,7 @@ public class STHDLTService extends ChannelService{
                     qyOrder.setOrderId( KeyHelper.createKey());
                     qyOrder.setPipleId(this.getPipleId());
                     qyOrder.setChannelId(channelPiple.getChannelId());
-                    qyOrder.setProductId(pipleProduct.getProductId());
+                    qyOrder.setProductId(product.getProductId());
                     qyOrder.setPipleOrderId(linkid);
                     qyOrder.setAmount(new BigDecimal(product.getPrice() / 100));
                     qyOrder.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
@@ -95,7 +91,7 @@ public class STHDLTService extends ChannelService{
                     }
                     bDeducted  = qyOrder.deduct(channelPiple.getVolt());
                     if(!bDeducted){ // 不扣量 通知渠道
-                        notifyChannelSMS(channelPiple.getNotifyUrl(),qyOrder,dest,"ok");
+                        notifyChannelSMS(channelPiple.getNotifyUrl(),qyOrder,"10660815","ok");
                     }
                 }else {
 					qyOrder.setResultCode(errorcode);
