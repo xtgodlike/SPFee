@@ -215,8 +215,6 @@ public class MYAQYService extends ChannelService{
 				if(cp == null){
                     return "channel error";
                 }
-				TProduct tProduct = this.tProductDao.selectByPrimaryKey(order.getProductId());
-				String productCode = tProduct.getProductCode();
 				//扣量
 				boolean bDeducted = false;
 				if(P_SUCCESS.equals(result)){
