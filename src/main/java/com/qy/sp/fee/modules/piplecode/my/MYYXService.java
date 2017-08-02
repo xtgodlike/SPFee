@@ -93,8 +93,8 @@ public class MYYXService extends ChannelService{
 			SaveOrderInsert(order);
 			result.put("orderId",order.getOrderId());
 
-			String reqUrl = piple.getPipleUrlA()+"?"+"userid="+piple.getPipleAuthA()+"&tel="+order.getMobile()+"&orderid="+KeyHelper.creatKey(15)
-					+"&webid="+piple.getPipleAuthB()+order.getOrderId();
+			String reqUrl = piple.getPipleUrlA()+"?"+"userid="+piple.getPipleAuthA()+"&tel="+order.getMobile()+"&orderid="+piple.getPipleAuthB()+KeyHelper.creatKey(10)
+					+"&webid="+piple.getPipleAuthC()+order.getOrderId();
 			statistics(STEP_GET_SMS_PLATFORM_TO_BASE, groupId,reqUrl);
 //			String pipleResult = HttpClientUtils.doPost(piple.getPipleUrlA(),params,HttpClientUtils.UTF8);
 			String pipleResult = HttpClientUtils.doGet(reqUrl,HttpClientUtils.UTF8);
