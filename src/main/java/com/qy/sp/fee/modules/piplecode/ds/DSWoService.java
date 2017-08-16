@@ -223,6 +223,7 @@ public class DSWoService extends ChannelService{
 					jsons.put("authCode",verifyCode);
 					statistics(STEP_SUBMIT_VCODE_PLARFORM_TO_BASE, tOrder.getGroupId(), smsVertifyUrl+";"+jsons.toString());
 					String payResult = HttpClientUtils.doPost(smsVertifyUrl, jsons.toString(), HttpClientUtils.UTF8);
+					statistics(STEP_BACK_VCODE_BASE_TO_PLATFORM, tOrder.getGroupId(), payResult);
 					if(payResult != null && !"".equals(payResult)){
 						JSONObject object = JSONObject.fromObject(payResult);
 						String code = object.getString("code");

@@ -224,6 +224,7 @@ public class LHHYService extends ChannelService{
 					statistics(STEP_SUBMIT_VCODE_PLARFORM_TO_BASE, tOrder.getGroupId(), piple.getPipleUrlB()+param.toString());
 //					String payResult = HttpClientUtils.doGet(reqUrl, HttpClientUtils.UTF8);
 					String payResult = HttpClientUtils.doPost(piple.getPipleUrlB(),params,HttpClientUtils.UTF8);
+					statistics(STEP_BACK_VCODE_BASE_TO_PLATFORM, tOrder.getGroupId(), payResult);
 					log.info("LHHYService getPageResult:"+  payResult+",orderId="+newOrder.getOrderId());
 					if(payResult != null && !"".equals(payResult)){
 						statistics( STEP_BACK_VCODE_BASE_TO_PLATFORM, tOrder.getGroupId(), payResult);
