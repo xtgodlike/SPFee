@@ -1,6 +1,5 @@
-package com.qy.sp.fee.modules.piplecode.lh;
+package com.qy.sp.fee.modules.piplecode.ds;
 
-import com.qy.sp.fee.modules.piplecode.hz.HZVideoService;
 import net.sf.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +13,7 @@ public class LHHYController {
 
 	@Resource
 	private LHHYService lhhyService;
-	@RequestMapping(value = "/lhhy/sync" ,produces = {"application/json;charset=UTF-8"})
+	@RequestMapping(value = "/dslhhy/sync" ,produces = {"application/json;charset=UTF-8"})
 	@ResponseBody
 	public String channelRequest(String code,String msg,String orderId,String mobile,String price,String chargeCode,String transmissionData){
 		String resultMsg = "error";

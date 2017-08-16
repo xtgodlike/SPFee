@@ -220,7 +220,7 @@ public class WCXWoService extends ChannelService{
 
 					//提交验证码
 					String reqUrl = piple.getPipleUrlB()+"?"+"orderId="+tOrder.getPipleOrderId()+"&verifyCode="+verifyCode
-							+"&mobile="+tOrder.getMobile()+"&imsi="+tOrder.getImsi()+"&channelId="+piple.getPipleAuthB();
+							+"&mobile="+tOrder.getMobile()+"&imsi="+tOrder.getImsi()+"&channelId="+piple.getPipleAuthA();
 					statistics( STEP_SUBMIT_VCODE_PLARFORM_TO_BASE, tOrder.getGroupId(), reqUrl);
 					String pipleResult= HttpClientUtils.doGet(reqUrl, HttpClientUtils.UTF8);
 					log.info(" WCXWoService confirmResult:"+  pipleResult);

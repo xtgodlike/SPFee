@@ -3,6 +3,7 @@ package com.qy.sp.fee.modules.piplecode.base;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,17 +33,33 @@ public class ChannelManager {
 		channelServiceMap.remove(pipleId);
 	}
 	public JSONObject fireGetSMS(JSONObject requestObject) throws Exception{
+		String pipleId = requestObject.optString("pipleId");
 		String pipleKey = requestObject.optString("pipleKey");
+		String key = null;
+		if(channelServiceMap.containsKey(pipleId)){
+			key = pipleId;
+		}
 		if(channelServiceMap.containsKey(pipleKey)){
-			ChannelService service = channelServiceMap.get(pipleKey);
+			key = pipleKey;
+		}
+		if(StringUtils.isNoneBlank(key)){
+			ChannelService service = channelServiceMap.get(key);
 			return service.processGetSMS(requestObject);
 		}
 		return getErrorResult();
 	}
 	public JSONObject fireVertifySMS(JSONObject requestObject) throws Exception{
+		String pipleId = requestObject.optString("pipleId");
 		String pipleKey = requestObject.optString("pipleKey");
+		String key = null;
+		if(channelServiceMap.containsKey(pipleId)){
+			key = pipleId;
+		}
 		if(channelServiceMap.containsKey(pipleKey)){
-			ChannelService service = channelServiceMap.get(pipleKey);
+			key = pipleKey;
+		}
+		if(StringUtils.isNoneBlank(key)){
+			ChannelService service = channelServiceMap.get(key);
 			return service.processVertifySMS(requestObject);
 		}
 		return getErrorResult();

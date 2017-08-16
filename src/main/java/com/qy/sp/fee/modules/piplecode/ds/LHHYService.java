@@ -1,4 +1,4 @@
-package com.qy.sp.fee.modules.piplecode.lh;
+package com.qy.sp.fee.modules.piplecode.ds;
 
 import com.qy.sp.fee.common.utils.*;
 import com.qy.sp.fee.dto.*;
@@ -27,12 +27,12 @@ public class LHHYService extends ChannelService{
 	private  Logger log = Logger.getLogger(LHHYService.class);
 	@Override
 	public String getPipleId() {
-		return "15004664097248680193260";
+		return "15028642768551465314927";
 	}
 
 	@Override
 	public String getPipleKey() {
-		return "PW1073";
+		return "PM1079";
 	}
 
 	@Override
@@ -76,10 +76,10 @@ public class LHHYService extends ChannelService{
 			ppkey.setProductId(tProduct.getProductId());
 			TPipleProduct pipleProduct = tPipleProductDao.selectByPrimaryKey(ppkey);
 			TPiple piple = tPipleDao.selectByPrimaryKey(pipleId);
-			TChannelPipleKey cpKey = new TChannelPipleKey();
-			cpKey.setPipleId(getPipleId());
-			cpKey.setChannelId(tChannel.getChannelId());
-			TChannelPiple channelPiple = tChannelPipleDao.selectByPrimaryKey(cpKey);
+//			TChannelPipleKey cpKey = new TChannelPipleKey();
+//			cpKey.setPipleId(getPipleId());
+//			cpKey.setChannelId(tChannel.getChannelId());
+//			TChannelPiple channelPiple = tChannelPipleDao.selectByPrimaryKey(cpKey);
 
 			//保存订单
 			LHHYOrder order = new LHHYOrder();
@@ -104,7 +104,8 @@ public class LHHYService extends ChannelService{
 			//请求验证码
 			Map<String, String> params = new HashMap<String, String>();
 			String reqUrl = piple.getPipleUrlA()+"?"+"imsi="+order.getImsi()+"&imei="+order.getImei()+"&mobile="+order.getMobile()
-					+"&Iccid="+order.getIccid()+"&chargeCode="+pipleProduct.getPipleProductCode()+"&callbackUrl="+channelPiple.getNotifyUrl()
+					+"&Iccid="+order.getIccid()+"&chargeCode="+pipleProduct.getPipleProductCode()
+					+"&callbackUrl="+piple.getNotifyUrlA()
 					+"&transmissionData="+order.getOrderId();
 			statistics(STEP_GET_SMS_PLATFORM_TO_BASE, groupId,reqUrl);
 //			String pipleResult = HttpClientUtils.doPost(piple.getPipleUrlA(),params,HttpClientUtils.UTF8);
@@ -217,8 +218,8 @@ public class LHHYService extends ChannelService{
 					String param = pipleProduct.getPipleProductCode();
 					//提交验证码
 					Map<String, String> params = new HashMap<String, String>();
-					params.put("OrderId",tOrder.getPipleOrderId());
-					params.put("AuthCode",newOrder.getVerifyCode());
+					params.put("orderId",tOrder.getPipleOrderId());
+					params.put("authCode",newOrder.getVerifyCode());
 //					String reqUrl = piple.getPipleUrlB()+"?channel="+channel+"&param="+param+"&smscode="+verifyCode;
 					statistics(STEP_SUBMIT_VCODE_PLARFORM_TO_BASE, tOrder.getGroupId(), piple.getPipleUrlB()+param.toString());
 //					String payResult = HttpClientUtils.doGet(reqUrl, HttpClientUtils.UTF8);

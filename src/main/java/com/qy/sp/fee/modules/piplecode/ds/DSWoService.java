@@ -45,6 +45,7 @@ public class DSWoService extends ChannelService{
 	
 	@Override
 	public JSONObject processGetSMS(JSONObject requestBody) throws Exception{
+		log.info("DSWoService processGetSMS requestBody:"+requestBody.toString());
 		JSONObject result = new JSONObject();
 		String productCode = requestBody.optString("productCode");
 		String apiKey = requestBody.optString("apiKey");

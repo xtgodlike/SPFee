@@ -132,6 +132,8 @@ public class BaseService {
 		cpkey.setPipleId(pipleId);
 		TChannelPiple tChannelPiple = tChannelPipleDao.selectByPrimaryKey(cpkey);
 		TPiple tPiple = tPipleDao.selectByPrimaryKey(pipleId);
+		log.info("----------------tChannelPiple="+(tChannelPiple==null?"null":tChannelPiple.getChannelId()));
+		log.info("----------------tPiple="+(tPiple==null?"null":tPiple.getPipleId()));
 		if(tChannelPiple==null || tPiple==null){
 			result = new BaseResult();
 			result.setResultCode(GlobalConst.CheckResult.PIPLE_ERROR+"");

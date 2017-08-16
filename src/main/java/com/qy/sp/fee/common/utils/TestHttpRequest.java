@@ -11,22 +11,23 @@ public class TestHttpRequest {
 
  public static void main(String[] args) throws UnsupportedEncodingException {
 
+
 	 	JSONObject parameters = new JSONObject();
-	 	parameters.put("apiKey", "3034");
-//	 	parameters.put("apiPwd", "B97FED4E9994E33353DFAA8A31428E11BD7AE59");
-//		parameters.put("pipleId", "14958555721785335696481");
-	 	parameters.put("pipleKey", "PW1069");
+	 	parameters.put("apiKey", "3027");
+	 	parameters.put("apiPwd", "KSTG123");
+		parameters.put("pipleId", "14775389896200102268388");
+//	 	parameters.put("pipleKey", "PM1079");
 //		parameters.put("appId", "a102");
-		parameters.put("productCode", "P01000");
-		parameters.put("mobile", "13602163400");
-		parameters.put("imei", "869722026793124");
-		parameters.put("imsi", "460002146050257");
-//		parameters.put("iccid", "89860085101151142361"); 
+		parameters.put("productCode", "P00400");
+//		parameters.put("mobile", "13602163400");
+//		parameters.put("imei", "869722026793124");
+//		parameters.put("imsi", "460019305092881");
+//		parameters.put("iccid", "89860085101151142361");
 //		parameters.put("ua", "test");
 //		parameters.put("appName", "测试APP"); 
 //		parameters.put("chargeName", "测试商品"); 
 //		parameters.put("imei", "866231025922455");
-		parameters.put("extData", "test01");
+		parameters.put("extData", "jsqy_rxbwt_api4y");
 //////		parameters.put("ip", "115.238.54.105"); 
 //////		parameters.put("iccid", "123456789012345"); 
 //		parameters.put("extData", "asdggasd"); 
@@ -52,7 +53,8 @@ public class TestHttpRequest {
 //	 	url = url+"&msg="+msg+"&ftime="+ftime;
 	 	try {// 139.196.27.18
 //	 		String result = HttpClientUtils.doPostp("http://localhost:8088/SPFee/piple/woshop/sync", "<callbackReq>测试</callbackReq>", HttpClientUtils.UTF8);
-			String result = HttpClientUtils.doPost("http://120.26.53.235/SPFee/channel/getSms", parameters.toString(), HttpClientUtils.UTF8);
+//			String result = HttpClientUtils.doPost("http://localhost:8888/spfee/channel/getSms", parameters.toString(), HttpClientUtils.UTF8);
+			String result = HttpClientUtils.doPost("http://www.chinaunigame.net:8120/spfee/channel/getSms", parameters.toString(), HttpClientUtils.UTF8);
 //	 		String result = HttpClientUtils.doPost("http://www.chinaunigame.net/spfee/channel/vertifySms", parameters.toString(), HttpClientUtils.UTF8);
 //			String result = HttpClientUtils.doPost("http://localhost:8888/channel/getSms", parameters.toString(), HttpClientUtils.UTF8);
 //			String result = HttpClientUtils.doPost("http://localhost:8888/SPFee/channel/vertifySms", parameters.toString(), HttpClientUtils.UTF8);

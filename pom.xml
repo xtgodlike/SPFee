@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.qy</groupId>
-  <artifactId>SPFee</artifactId>
+  <artifactId>spfee</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>war</packaging>
   
@@ -230,7 +230,7 @@
 		</dependency>
   </dependencies>
 	<build>
-		<finalName>SPFee</finalName>
+		<finalName>spfee</finalName>
 		<plugins>
 			<!-- 设置编译1.6 支持注解和泛型 -->
 			<plugin>
