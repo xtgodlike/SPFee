@@ -217,17 +217,16 @@ public class LHHYService extends ChannelService{
 					String channel = piple.getPipleAuthA();
 					String param = pipleProduct.getPipleProductCode();
 					//提交验证码
-					Map<String, String> params = new HashMap<String, String>();
+					JSONObject params = new JSONObject();
 					params.put("orderId",tOrder.getPipleOrderId());
 					params.put("authCode",newOrder.getVerifyCode());
 //					String reqUrl = piple.getPipleUrlB()+"?channel="+channel+"&param="+param+"&smscode="+verifyCode;
 					statistics(STEP_SUBMIT_VCODE_PLARFORM_TO_BASE, tOrder.getGroupId(), piple.getPipleUrlB()+param.toString());
 //					String payResult = HttpClientUtils.doGet(reqUrl, HttpClientUtils.UTF8);
-					String payResult = HttpClientUtils.doPost(piple.getPipleUrlB(),params,HttpClientUtils.UTF8);
+					String payResult = HttpClientUtils.doPost(piple.getPipleUrlB(),params.toString(),HttpClientUtils.UTF8);
 					statistics(STEP_BACK_VCODE_BASE_TO_PLATFORM, tOrder.getGroupId(), payResult);
 					log.info("LHHYService getPageResult:"+  payResult+",orderId="+newOrder.getOrderId());
 					if(payResult != null && !"".equals(payResult)){
-						statistics( STEP_BACK_VCODE_BASE_TO_PLATFORM, tOrder.getGroupId(), payResult);
 						JSONObject object = JSONObject.fromObject(payResult);
 						String resultMsg = null;
 						String code = null;
@@ -239,13 +238,13 @@ public class LHHYService extends ChannelService{
 								newOrder.setResultCode(code);
 								newOrder.setModTime(DateTimeUtils.getCurrentTime());
 								newOrder.setOrderStatus(GlobalConst.OrderStatus.TRADING);
-								newOrder.setSubStatus(GlobalConst.SubStatus.PAY_GET_SMS_SUCCESS);
+								newOrder.setSubStatus(GlobalConst.SubStatus.PAY_SUBMIT_CODE_SUCCESS);
 								result.put("resultCode", GlobalConst.Result.SUCCESS);
 								result.put("resultMsg","请求成功。");
 							}else{
 								newOrder.setModTime(DateTimeUtils.getCurrentTime());
 								newOrder.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-								newOrder.setSubStatus(GlobalConst.SubStatus.PAY_GET_SMS_FAIL);
+								newOrder.setSubStatus(GlobalConst.SubStatus.PAY_SUBMIT_CODE_FAIL);
 								newOrder.setResultCode(code);
 								result.put("resultCode", GlobalConst.Result.ERROR);
 								result.put("resultMsg","请求失败:"+msg);
@@ -253,7 +252,7 @@ public class LHHYService extends ChannelService{
 						}else{
 							newOrder.setModTime(DateTimeUtils.getCurrentTime());
 							newOrder.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-							newOrder.setSubStatus(GlobalConst.SubStatus.PAY_GET_SMS_FAIL);
+							newOrder.setSubStatus(GlobalConst.SubStatus.PAY_SUBMIT_CODE_FAIL);
 							result.put("resultCode", GlobalConst.Result.ERROR);
 							result.put("resultMsg","请求失败:"+payResult);
 						}
@@ -288,11 +287,11 @@ public class LHHYService extends ChannelService{
 		String code = requestBody.optString("code");
 		String msg = requestBody.optString("msg");
 		String orderId = requestBody.optString("orderId");
-		String mobile = requestBody.optString("mobile");  // 我方订单号
+		String mobile = requestBody.optString("mobile");
 		String price = requestBody.optString("price");
 		String chargeCode = requestBody.optString("chargeCode");
-		String transmissionData = requestBody.optString("transmissionData");
-		TOrder order = tOrderDao.selectByPipleOrderId(orderId);
+		String transmissionData = requestBody.optString("transmissionData"); // 我方订单号
+		TOrder order = tOrderDao.selectByPrimaryKey(transmissionData);
 		if(order!=null ){ // 同步数据正确
 			try {
 				statistics(STEP_PAY_BASE_TO_PLATFORM, order.getGroupId(), requestBody.toString());

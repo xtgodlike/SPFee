@@ -13,12 +13,12 @@ public class TestHttpRequest {
 
 
 	 	JSONObject parameters = new JSONObject();
-	 	parameters.put("apiKey", "3027");
-	 	parameters.put("apiPwd", "KSTG123");
-		parameters.put("pipleId", "14775389896200102268388");
-//	 	parameters.put("pipleKey", "PM1079");
+	 	parameters.put("apiKey", "3026");
+//	 	parameters.put("apiPwd", "KSTG123");
+//		parameters.put("pipleId", "14775389896200102268388");
+	 	parameters.put("pipleKey", "PM1079");
 //		parameters.put("appId", "a102");
-		parameters.put("productCode", "P00400");
+//		parameters.put("productCode", "P00400");
 //		parameters.put("mobile", "13602163400");
 //		parameters.put("imei", "869722026793124");
 //		parameters.put("imsi", "460019305092881");
@@ -27,13 +27,13 @@ public class TestHttpRequest {
 //		parameters.put("appName", "测试APP"); 
 //		parameters.put("chargeName", "测试商品"); 
 //		parameters.put("imei", "866231025922455");
-		parameters.put("extData", "jsqy_rxbwt_api4y");
+//		parameters.put("extData", "jsqy_rxbwt_api4y");
 //////		parameters.put("ip", "115.238.54.105"); 
 //////		parameters.put("iccid", "123456789012345"); 
 //		parameters.put("extData", "asdggasd"); 
 ////		// 提交验证码
-//		parameters.put("orderId", "14725542792384169057861");
-//		parameters.put("vCode", "995361");
+		parameters.put("orderId", "15029331336479642726727");
+		parameters.put("verifyCode", "928511");
 //	 	
 //	 	// 其他测试
 //	 	parameters.put("apiKey", "1003");
@@ -54,8 +54,8 @@ public class TestHttpRequest {
 	 	try {// 139.196.27.18
 //	 		String result = HttpClientUtils.doPostp("http://localhost:8088/SPFee/piple/woshop/sync", "<callbackReq>测试</callbackReq>", HttpClientUtils.UTF8);
 //			String result = HttpClientUtils.doPost("http://localhost:8888/spfee/channel/getSms", parameters.toString(), HttpClientUtils.UTF8);
-			String result = HttpClientUtils.doPost("http://www.chinaunigame.net:8120/spfee/channel/getSms", parameters.toString(), HttpClientUtils.UTF8);
-//	 		String result = HttpClientUtils.doPost("http://www.chinaunigame.net/spfee/channel/vertifySms", parameters.toString(), HttpClientUtils.UTF8);
+//			String result = HttpClientUtils.doPost("http://www.chinaunigame.net:8120/spfee/channel/getSms", parameters.toString(), HttpClientUtils.UTF8);
+	 		String result = HttpClientUtils.doPost("http://localhost:8888/spfee/channel/vertifySms", parameters.toString(), HttpClientUtils.UTF8);
 //			String result = HttpClientUtils.doPost("http://localhost:8888/channel/getSms", parameters.toString(), HttpClientUtils.UTF8);
 //			String result = HttpClientUtils.doPost("http://localhost:8888/SPFee/channel/vertifySms", parameters.toString(), HttpClientUtils.UTF8);
 //			String result = HttpClientUtils.doPost("http://localhost:8888/SPFee/api/sdk/phone/getMongodbUserGroup", parameters.toString(), HttpClientUtils.UTF8);

@@ -46,7 +46,7 @@ public class HttpClientUtils {
 	
 	private static PoolingHttpClientConnectionManager cm;
 	private static RequestConfig requestConfig;
-	
+	private static Logger log = Logger.getLogger(HttpClientUtils.class);
 	static{
 		cm = new PoolingHttpClientConnectionManager();
 		//Increase max total connection to 200  
@@ -149,7 +149,7 @@ public class HttpClientUtils {
 	 */
 	public static String doAuthPost(String url, String json,Map<String, String> authMap, String encode) throws Exception {
 		CloseableHttpClient httpclient = bulidHttpClient();
-
+		log.debug("HttpClient:DoPost::" + url);
 		HttpPost httpPost = new HttpPost(url);
 		httpPost.setHeader("Accept", "application/json");
 		httpPost.setHeader("Content-Type", "application/json;charset="+encode+"");
@@ -189,7 +189,7 @@ public class HttpClientUtils {
 	 * @throws Exception
 	 */
 	public static String doPost(String url, Map<String, String> params,String encode) throws Exception {
-		Logger log = Logger.getLogger(HttpClientUtils.class);
+
 		log.debug("HttpClient:DoPost::" + url);
 		CloseableHttpClient httpclient = bulidHttpClient();
 		HttpPost httpPost = new HttpPost(url);
