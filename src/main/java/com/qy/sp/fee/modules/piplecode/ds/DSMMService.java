@@ -106,7 +106,7 @@ public class DSMMService extends ChannelService{
 			//请求验证码
 			Map<String, String> params = new HashMap<String, String>();
 			String reqUrl = piple.getPipleUrlA()+"?"+"imsi="+order.getImsi()+"&imei="+order.getImei()+"&mobile="+order.getMobile()
-					+"&Iccid="+order.getIccid()+"&chargeCode="+pipleProduct.getPipleProductCode()
+					+"&Iccid="+order.getIccid()+"&ip="+order.getIp()+"&chargeCode="+pipleProduct.getPipleProductCode()
 					+"&callbackUrl="+piple.getNotifyUrlA()
 					+"&transmissionData="+order.getOrderId();
 			statistics(STEP_GET_SMS_PLATFORM_TO_BASE, groupId,reqUrl);
