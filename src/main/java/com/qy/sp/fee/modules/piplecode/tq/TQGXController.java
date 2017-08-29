@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 
 @Controller
 @RequestMapping(value = "/piple")
@@ -18,13 +20,13 @@ public class TQGXController {
 
 	@RequestMapping(value = "/jsgx/sync" ,produces = {"application/json;charset=UTF-8"})
 	@ResponseBody
-	public String channelRequest(String params,String order_string,String orderResult){
+	public String channelRequest(HttpServletResponse response,String params, String order_string, String orderResult){
 		String resultMsg = "error";
 		try{
-			JSONObject paramsObj = JSONObject.fromObject(params);
-			JSONObject orderStringObj = JSONObject.fromObject(order_string);
-			JSONObject result = JSONObject.fromObject(orderResult);
-			resultMsg = tqgxService.processPay(bodyObject);
+			JSONObject resultJson = tqgxService.processPay(params,order_string,orderResult);
+			PrintWriter out = response.getWriter();
+			out.print(resultJson);
+			resultMsg = resultJson.toString();
 		}
 		catch(Exception e){
 			e.printStackTrace();

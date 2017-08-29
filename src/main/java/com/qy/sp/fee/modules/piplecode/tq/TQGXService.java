@@ -9,6 +9,7 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,8 +23,10 @@ public class TQGXService extends ChannelService{
 	public final static int GETCODE_FAIL 	= 2; 
 	public final static int PAY_SUCCESS = 3;
 	public final static int PAY_FAIL = 4;
-	public final static String RES_SUCCESS = "0";  // 请求通道成功
-	public final static String P_SUCCESS = "succ";	  // 同步计费成功
+	public final static String OP_TYPE_DB = "1";	  // 点播
+	public final static String OP_TYPE_BY = "2";	  // 包月
+	public final static String OP_TYPE_TD = "3";	  // 退订
+	public final static String P_SUCCESS = "1";	  // 同步订购成功
 	private  Logger log = Logger.getLogger(TQGXService.class);
 	@Override
 	public String getPipleId() {
@@ -35,150 +38,155 @@ public class TQGXService extends ChannelService{
 		return "PM1082";
 	}
 
-	public JSONObject processGetRespond(JSONObject requestBody) throws Exception {
-		log.info("DXTVideoService requestBody:"+requestBody);
-		JSONObject result = new JSONObject();
-		String productCode = requestBody.optString("productCode");
-		String apiKey = requestBody.optString("apiKey");
-		
-		String mobile = requestBody.optString("mobile");
-		String pipleKey = requestBody.optString("pipleKey");
-		String imsi = requestBody.optString("imsi");
-		String imei = requestBody.optString("imei");
-		String extData = requestBody.optString("extData");
-		if(StringUtil.isEmptyString(productCode) || StringUtil.isEmptyString(apiKey)   || StringUtil.isEmpty(pipleKey) || StringUtil.isEmpty(imsi) || StringUtil.isEmpty(mobile)){
-			result.put("resultCode",GlobalConst.CheckResult.MUST_PARAM_ISNULL+"");
-			result.put("resultMsg",GlobalConst.CheckResultDesc.message.get(GlobalConst.CheckResult.MUST_PARAM_ISNULL));
-			return result;
-		}else{
-			BaseChannelRequest req = new BaseChannelRequest();
-			req.setApiKey(apiKey);
-			req.setImsi(imsi);
-			req.setProductCode(productCode);
-			req.setMobile(mobile);
-			// 调用合法性校验
-			TPiple tPiple = tPipleDao.selectByPipleKey(pipleKey);
-			String pipleId = tPiple==null?"":tPiple.getPipleId();
-			BaseResult bResult = this.accessVerify(req,pipleId);
-			if(bResult!=null){// 返回不为空则校验不通过
-				result.put("resultCode",bResult.getResultCode());
-				result.put("resultMsg",bResult.getResultMsg());
-				return result;
-			}
-			String groupId = KeyHelper.createKey();
-			statistics( STEP_GET_SMS_CHANNEL_TO_PLATFORM, groupId, requestBody.toString());
-			TChannel tChannel = tChannelDao.selectByApiKey(req.getApiKey());
-			TProduct tProduct = tProductDao.selectByCode(req.getProductCode());
-			TPipleProductKey ppkey = new TPipleProductKey();
-			ppkey.setPipleId(pipleId);
-			ppkey.setProductId(tProduct.getProductId());
-			TPipleProduct pipleProduct = tPipleProductDao.selectByPrimaryKey(ppkey);
-			TPiple piple = tPipleDao.selectByPrimaryKey(pipleId);
-			
-			//保存订单
-			DXTVideoOrder order = new DXTVideoOrder();
+	public JSONObject processPay(String params,String order_string,String orderResult) throws Exception {
+		log.info("TQGXService params:"+params);
+		log.info("TQGXService order_string:"+order_string);
+		log.info("TQGXService orderResult:"+orderResult);
+		TQGXOrder order = new TQGXOrder();
+		String groupId = KeyHelper.createKey();
+		if(StringUtil.isNotEmptyString(order_string)) {
+			statistics( STEP_SUBMIT_VCODE_CHANNEL_TO_PLATFORM, groupId, order_string);
+			JSONObject orderStringObj = JSONObject.fromObject(order_string);
+			String sms = orderStringObj.getString("order_string");
+			String mobile = orderStringObj.getString("user_id");
+			String access_num = orderStringObj.getString("access_num");
+//			String stream_no = orderStringObj.getString("stream_no");  // 缺失通道订单号
+
+			String[] smsStr = sms.split("#");  // order_string 指令#后4位拓展字段定义为渠道apiKey
+			String apiKey = smsStr[1];
+			TChannel channel = tChannelDao.selectByApiKey(apiKey);
 			order.setOrderId(KeyHelper.createKey());
-			order.setPipleId(pipleId);
-			order.setChannelId(tChannel.getChannelId());
+			order.setPipleId(getPipleId());
+			order.setChannelId(channel.getChannelId());
 			order.setMobile(mobile);
-			order.setImsi(imsi);
-			order.setImei(imei);
-			order.setProductId(tProduct.getProductId());
-			order.setOrderStatus(INIT);
-			order.setSubStatus(INIT);
+			order.setOrderStatus(GlobalConst.OrderStatus.INIT);
+			order.setSubStatus(GlobalConst.SubStatus.PAY_INIT);
 			order.setCreateTime(DateTimeUtils.getCurrentTime());
-			order.setAmount(new BigDecimal(tProduct.getPrice()/100.0));
+			order.setModTime(DateTimeUtils.getCurrentTime());
 			int  provinceId = this.getProvinceIdByMobile(mobile, false); // 获取省份ID
 			order.setProvinceId(provinceId);
-			order.setExtData(extData);
 			order.setGroupId(groupId);
+			order.setOrder_string(order_string);
+			order.setAccess_num(access_num);
 			SaveOrderInsert(order);
-			result.put("orderId",order.getOrderId());
-			//请求第一条短信
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("qid", piple.getPipleAuthA());
-			params.put("imsi", order.getImsi());
-			params.put("imei", order.getImei());
-			params.put("cp_param", order.getOrderId());  // 我方orderId
-			String reqUrl = piple.getPipleUrlA()+"?"+"qid="+piple.getPipleAuthA()+"&imsi="+order.getImsi()+"&imei="+order.getImei()+"&cp_param="+order.getOrderId();
-			statistics(STEP_GET_SMS_PLATFORM_TO_BASE, groupId,reqUrl);
-//			String pipleResult = HttpClientUtils.doPost(piple.getPipleUrlA(),params,HttpClientUtils.UTF8);
-			String pipleResult = HttpClientUtils.doGet(reqUrl,HttpClientUtils.UTF8);
-			statistics(STEP_BACK_SMS_BASE_TO_PLATFORM, groupId,pipleResult);
-			log.info(" DXTVideoService getSmsResult:"+  pipleResult);
-			if(pipleResult != null && !"".equals(pipleResult)){
-				JSONObject jsonObj = JSONObject.fromObject(pipleResult);
-				String status = null;
-				String data = null;
-				String sms1 = null;
-				String msgtxtenc = null;
-				String sms2 = null;
-				String msgtxtenc2 = null;
-				if(jsonObj.has("status") ){
-					status = jsonObj.getString("status");
-					if(RES_SUCCESS.equals(status)){ // 返回成功
-						data = jsonObj.getString("data");
-						JSONObject dataObj = JSONObject.fromObject(data);
-						sms1 = dataObj.getString("sms1");
-						msgtxtenc = dataObj.getString("msgtxtenc");
-						sms2 = dataObj.getString("sms2");
-						msgtxtenc2 = dataObj.getString("msgtxtenc2");
-						//						 order.setPipleOrderId(billid);
-						order.setSmsNumber1(sms1);
-						order.setSmsContent1(msgtxtenc);
-						order.setSmsNumber2(sms2);
-						order.setSmsContent2(msgtxtenc2);
-						result.put("smsNumber1", sms1);
-						result.put("smsContent1", msgtxtenc);
-						result.put("smsNumber2", sms2);
-						result.put("smsContent2", msgtxtenc2);
-						// 更新订单信息
-						order.setOrderStatus(GlobalConst.OrderStatus.TRADING);
-						order.setSubStatus(GETCODE_SUCCESS);
-						order.setResultCode(GlobalConst.Result.SUCCESS);
-						order.setModTime(DateTimeUtils.getCurrentTime());
-						//设置返回结果
-						result.put("resultCode",GlobalConst.Result.SUCCESS);
-						result.put("resultMsg","请求成功");
-						SaveOrderUpdate(order);
-						statistics(STEP_BACK_SMS_PLATFORM_TO_CHANNEL, groupId, result.toString());
-						return result;
-					}else{
-						status = jsonObj.getString("status");
-						order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-						order.setSubStatus(GETCODE_FAIL);
-						order.setResultCode(status);
-						order.setModTime(DateTimeUtils.getCurrentTime());
-						SaveOrderUpdate(order);
-						result.put("resultCode", GlobalConst.Result.ERROR);
-						result.put("resultMsg","请求失败:"+status);
-						statistics(STEP_BACK_SMS_PLATFORM_TO_CHANNEL, groupId, result.toString());
-						return result;
-					}
+		}
+		if(StringUtil.isNotEmptyString(params)) {
+			JSONObject paramsObj = JSONObject.fromObject(params);
+			if(paramsObj.has("linkId")) { // 为点播方式
+				statistics( STEP_SUBMIT_VCODE_CHANNEL_TO_PLATFORM, groupId, params);
+				String mobile = paramsObj.getString("user_id");
+				String access_num = paramsObj.getString("access_num");
+				String sms = paramsObj.getString("order_string");
+				String ismp_product_id = paramsObj.getString("ismp_product_id"); // 计费点代码
+				String linkId = paramsObj.getString("linkId");
+				String correlator = paramsObj.getString("correlator");
 
-				}else{
-					status = jsonObj.getString("status");
-					order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-					order.setSubStatus(GETCODE_FAIL);
-					order.setResultCode(status);
-					order.setModTime(DateTimeUtils.getCurrentTime());
-					SaveOrderUpdate(order);
-					result.put("resultCode", GlobalConst.Result.ERROR);
-					result.put("resultMsg","请求失败:"+status);
-					statistics(STEP_BACK_SMS_PLATFORM_TO_CHANNEL, groupId, result.toString());
-					return result;
-				}
-			}else{
-				order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-				order.setSubStatus(GETCODE_FAIL);
+				String[] smsStr = sms.split("#");  // order_string 指令#后4位拓展字段定义为渠道apiKey
+				String apiKey = smsStr[1];
+				TChannel channel = tChannelDao.selectByApiKey(apiKey);
+
+				TPipleProduct ppkey = new TPipleProduct();
+				ppkey.setPipleId(getPipleId());
+				ppkey.setPipleProductCode(ismp_product_id);
+				TPipleProduct pipleProduct = tPipleProductDao.selectByPipleProductCode(ppkey);
+				TProduct tProduct = tProductDao.selectByPrimaryKey(pipleProduct.getProductId());
+
+				order.setOrderId(KeyHelper.createKey());
+				order.setPipleOrderId(linkId);
+				order.setPipleId(getPipleId());
+				order.setChannelId(channel.getChannelId());
+				order.setMobile(mobile);
+				order.setOrderStatus(GlobalConst.OrderStatus.TRADING);
+				order.setSubStatus(GlobalConst.SubStatus.PAY_SEND_MESSAGE_SUCCESS);
+				order.setCreateTime(DateTimeUtils.getCurrentTime());
 				order.setModTime(DateTimeUtils.getCurrentTime());
-				SaveOrderUpdate(order);
-				result.put("resultCode",GlobalConst.Result.ERROR);
-				result.put("resultMsg","请求失败，接口异常");
-				statistics(STEP_BACK_SMS_PLATFORM_TO_CHANNEL, groupId, result.toString());
-				return result;
+				order.setAmount(new BigDecimal(tProduct.getPrice()/100.0));
+				int  provinceId = this.getProvinceIdByMobile(mobile, false); // 获取省份ID
+				order.setProvinceId(provinceId);
+				order.setGroupId(groupId);
+				order.setOrder_string(order_string);
+				order.setAccess_num(access_num);
+				order.setCorrelator(correlator);
+				order.setResultCode(OP_TYPE_DB);
+				SaveOrderInsert(order);
+			}else if(paramsObj.has("stream_no")) {
+				String mobile = paramsObj.getString("user_id");
+				String access_num = paramsObj.getString("access_num");
+				String sms = paramsObj.getString("order_string");
+				String ismp_product_id = paramsObj.getString("ismp_product_id"); // 计费点代码
+				String op_type = paramsObj.getString("op_type");
+				String stream_no = paramsObj.getString("stream_no");
+				String correlator = paramsObj.getString("correlator");
+
+				TPipleProduct ppkey = new TPipleProduct();
+				ppkey.setPipleId(getPipleId());
+				ppkey.setPipleProductCode(ismp_product_id);
+				TPipleProduct pipleProduct = tPipleProductDao.selectByPipleProductCode(ppkey);
+				TProduct tProduct = tProductDao.selectByPrimaryKey(pipleProduct.getProductId());
+
+//				String sms = paramsObj.getString("order_string");  // 缺失指令
+				TOrder oldOrder = tOrderDao.selectByPipleOrderId(stream_no);
+				TQGXOrder tqgxOrder = new TQGXOrder();
+				tqgxOrder.setTOrder(oldOrder);
+				tqgxOrder.setOrderStatus(GlobalConst.OrderStatus.INIT);
+				tqgxOrder.setSubStatus(GlobalConst.SubStatus.PAY_INIT);
+				tqgxOrder.setModTime(DateTimeUtils.getCurrentTime());
+				tqgxOrder.setAmount(new BigDecimal(tProduct.getPrice()/100.0));
+				int  provinceId = this.getProvinceIdByMobile(mobile, false); // 获取省份ID
+				tqgxOrder.setProvinceId(provinceId);
+				tqgxOrder.setCorrelator(correlator);
+				tqgxOrder.setResultCode(op_type);
+				SaveOrderUpdate(tqgxOrder);
+			}
+			// 返回响应数据
+			JSONObject resultJson = new JSONObject();
+			resultJson.put("content","");
+			resultJson.put("blackflag","0");   // 0正常  1黑名单
+			return resultJson;
+		}
+		// 同步交易结果
+		if(StringUtil.isNotEmptyString(orderResult)) {
+			JSONObject orderResultObj = JSONObject.fromObject(params);
+			String linkId = null;
+			if(orderResultObj.has("linkId")) {
+				linkId = orderResultObj.getString("linkId");
+			}else if(orderResultObj.has("stream_no")) {
+				linkId = orderResultObj.getString("stream_no");
+			}
+			TOrder nowOrder = tOrderDao.selectByPipleOrderId(linkId);
+			if(nowOrder!=null) {
+				statistics(STEP_PAY_BASE_TO_PLATFORM, nowOrder.getGroupId(), orderResult);
+				TChannelPipleKey pkey = new TChannelPipleKey();
+				pkey.setChannelId(order.getChannelId());
+				pkey.setPipleId(order.getPipleId());
+				TChannelPiple cp =  tChannelPipleDao.selectByPrimaryKey(pkey);
+				String result = orderResultObj.getString("result");
+				if(result.equals(P_SUCCESS)) {
+					boolean bDeducted = false; // 扣量
+					if(nowOrder.getResultCode().equals(OP_TYPE_DB) || nowOrder.getResultCode().equals(OP_TYPE_BY)) {
+						order.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
+						order.setSubStatus(PAY_SUCCESS);
+						order.setModTime(DateTimeUtils.getCurrentTime());
+						order.setCompleteTime(DateTimeUtils.getCurrentTime());
+						order.setResultCode(result);
+						doWhenPaySuccess(order);
+						bDeducted  = order.deduct(cp.getVolt());  // 是否扣量
+						if(!bDeducted){ // 不扣量 通知渠道
+							notifyChannelAPIForKey(cp.getNotifyUrl(),order,"ok");
+						}
+					}else {
+						order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
+						order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
+						order.setModTime(DateTimeUtils.getCurrentTime());
+					}
+				}else {
+					order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
+					order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
+					order.setModTime(DateTimeUtils.getCurrentTime());
+				}
 			}
 		}
+		return null;
 	}
 	
 	
@@ -247,107 +255,77 @@ public class TQGXService extends ChannelService{
 	protected boolean isUseableTradeDayAndMonth() {
 		return true;
 	}
-	public class DXTVideoOrder extends TOrder{
-		private String imei;
-		private String cpParam;  // 透传参数
-		private String smsNumber1;
-		private String smsContent1;
-		private String smsNumber2;
-		private String smsContent2;
-		
-		
-		public String getImei() {
-			return imei;
+
+	public class TQGXOrder extends TOrder{
+		private String access_num;	// 接入号
+		private String order_string;  // 订购命令字
+		private String correlator;	// 随机码
+		private String op_type;	// 订购类型(点播值是1，包月值是2，退订值是3)
+
+
+		public String getAccess_num() {
+			return access_num;
 		}
 
-		public void setImei(String imei) {
-			this.imei = imei;
+		public void setAccess_num(String access_num) {
+			this.access_num = access_num;
 		}
 
-		public String getCpParam() {
-			return cpParam;
+		public String getOrder_string() {
+			return order_string;
 		}
 
-		public void setCpParam(String cpParam) {
-			this.cpParam = cpParam;
+		public void setOrder_string(String order_string) {
+			this.order_string = order_string;
 		}
 
-		public String getSmsNumber1() {
-			return smsNumber1;
+		public String getCorrelator() {
+			return correlator;
 		}
 
-		public void setSmsNumber1(String smsNumber1) {
-			this.smsNumber1 = smsNumber1;
+		public void setCorrelator(String correlator) {
+			this.correlator = correlator;
 		}
 
-		public String getSmsNumber2() {
-			return smsNumber2;
+		public String getOp_type() {
+			return op_type;
 		}
 
-		public void setSmsNumber2(String smsNumber2) {
-			this.smsNumber2 = smsNumber2;
-		}
-
-		public String getSmsContent1() {
-			return smsContent1;
-		}
-
-		public void setSmsContent1(String smsContent1) {
-			this.smsContent1 = smsContent1;
-		}
-
-		public String getSmsContent2() {
-			return smsContent2;
-		}
-
-		public void setSmsContent2(String smsContent2) {
-			this.smsContent2 = smsContent2;
+		public void setOp_type(String op_type) {
+			this.op_type = op_type;
 		}
 
 		public List<TOrderExt> gettOrderExts() {
 			List<TOrderExt> tOrderExts = new ArrayList<TOrderExt>();
-			if(this.imei != null){
+			if(this.access_num != null){
 				TOrderExt oExt = new TOrderExt();
-				oExt.setExtKey("imei");
-				oExt.setExtValue(this.imei);
+				oExt.setExtKey("access_num");
+				oExt.setExtValue(this.access_num);
 				oExt.setOrderId(this.getOrderId());
 				tOrderExts.add(oExt);
 			}
-			if(this.cpParam != null){
+			if(this.order_string != null){
 				TOrderExt oExt = new TOrderExt();
-				oExt.setExtKey("cpParam");
-				oExt.setExtValue(this.cpParam);
+				oExt.setExtKey("order_string");
+				oExt.setExtValue(this.order_string);
 				oExt.setOrderId(this.getOrderId());
 				tOrderExts.add(oExt);
 			}
-			if(this.smsNumber1 != null){
+			if(this.correlator != null){
 				TOrderExt oExt = new TOrderExt();
-				oExt.setExtKey("smsNumber1");
-				oExt.setExtValue(this.smsNumber1);
+				oExt.setExtKey("correlator");
+				oExt.setExtValue(this.correlator);
 				oExt.setOrderId(this.getOrderId());
 				tOrderExts.add(oExt);
 			}
-			if(this.smsContent1 != null){
+			if(this.op_type != null){
 				TOrderExt oExt = new TOrderExt();
-				oExt.setExtKey("sms1");
-				oExt.setExtValue(this.smsContent1);
+				oExt.setExtKey("op_type");
+				oExt.setExtValue(this.op_type);
 				oExt.setOrderId(this.getOrderId());
 				tOrderExts.add(oExt);
 			}
-			if(this.smsNumber2 != null){
-				TOrderExt oExt = new TOrderExt();
-				oExt.setExtKey("smsNumber2");
-				oExt.setExtValue(this.smsNumber2);
-				oExt.setOrderId(this.getOrderId());
-				tOrderExts.add(oExt);
-			}
-			if(this.smsContent2 != null){
-				TOrderExt oExt = new TOrderExt();
-				oExt.setExtKey("sms2");
-				oExt.setExtValue(this.smsContent2);
-				oExt.setOrderId(this.getOrderId());
-				tOrderExts.add(oExt);
-			}
+
 			return tOrderExts;
 		}
 	}
