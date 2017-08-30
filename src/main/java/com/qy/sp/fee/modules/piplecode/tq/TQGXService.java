@@ -162,28 +162,37 @@ public class TQGXService extends ChannelService{
 				TChannelPiple cp =  tChannelPipleDao.selectByPrimaryKey(pkey);
 				String result = orderResultObj.getString("result");
 				if(result.equals(P_SUCCESS)) {
-					boolean bDeducted = false; // 扣量
-					if(nowOrder.getResultCode().equals(OP_TYPE_DB) || nowOrder.getResultCode().equals(OP_TYPE_BY)) {
-						order.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
-						order.setSubStatus(PAY_SUCCESS);
-						order.setModTime(DateTimeUtils.getCurrentTime());
-						order.setCompleteTime(DateTimeUtils.getCurrentTime());
-						order.setResultCode(result);
-						doWhenPaySuccess(order);
-						bDeducted  = order.deduct(cp.getVolt());  // 是否扣量
-						if(!bDeducted){ // 不扣量 通知渠道
-							notifyChannelAPIForKey(cp.getNotifyUrl(),order,"ok");
+						if(nowOrder.getResultCode().equals(OP_TYPE_DB) || nowOrder.getResultCode().equals(OP_TYPE_BY)) {
+							boolean bDeducted = false; // 扣量
+							order.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
+							if(nowOrder.getResultCode().equals(OP_TYPE_DB)) {
+								order.setSubStatus(GlobalConst.SubStatus.PAY_SUCCESS);
+							}else {
+								order.setSubStatus(GlobalConst.SubStatus.PAY_SUCCESS_DG);
+							}
+
+							order.setModTime(DateTimeUtils.getCurrentTime());
+							order.setCompleteTime(DateTimeUtils.getCurrentTime());
+							order.setResultCode(result);
+							doWhenPaySuccess(order);
+							bDeducted  = order.deduct(cp.getVolt());  // 是否扣量
+							if(!bDeducted){ // 不扣量 通知渠道
+								notifyChannelAPIForKey(cp.getNotifyUrl(),order,"ok");
+							}
+						}else if(nowOrder.getResultCode().equals(OP_TYPE_TD)) {
+							order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
+							order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
+							order.setModTime(DateTimeUtils.getCurrentTime());
 						}
 					}else {
 						order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-						order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
+						order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR_TG);
 						order.setModTime(DateTimeUtils.getCurrentTime());
 					}
-				}else {
-					order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-					order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
-					order.setModTime(DateTimeUtils.getCurrentTime());
-				}
+			}else {
+				order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
+				order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
+				order.setModTime(DateTimeUtils.getCurrentTime());
 			}
 		}
 		return null;

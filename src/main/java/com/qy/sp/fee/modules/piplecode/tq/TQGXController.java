@@ -1,5 +1,6 @@
 package com.qy.sp.fee.modules.piplecode.tq;
 
+import com.qy.sp.fee.common.utils.StringUtil;
 import com.qy.sp.fee.modules.piplecode.dxtv.DXTVideoService;
 import net.sf.json.JSONObject;
 import org.springframework.stereotype.Controller;
@@ -23,6 +24,9 @@ public class TQGXController {
 	public String channelRequest(HttpServletResponse response,String params, String order_string, String orderResult){
 		String resultMsg = "error";
 		try{
+			if(StringUtil.isEmpty(params) && StringUtil.isEmpty(order_string) && StringUtil.isEmpty(orderResult)){
+				return "required parameter all empty";
+			}
 			JSONObject resultJson = tqgxService.processPay(params,order_string,orderResult);
 			PrintWriter out = response.getWriter();
 			out.print(resultJson);
