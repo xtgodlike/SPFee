@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.net.URLDecoder;
 
 @Controller
 @RequestMapping(value = "/piple")
@@ -19,7 +20,8 @@ public class KYWOController {
 	public String channelRequest(@RequestBody String requestBody){
 		String resultMsg = "error";
 		try{
-			JSONObject requestObject = JSONObject.fromObject(requestBody);
+			String params = URLDecoder.decode(requestBody,"utf-8");
+			JSONObject requestObject = JSONObject.fromObject(params);
 			resultMsg = kywoService.processPaySuccess(requestObject);
 		}
 		catch(Exception e){
@@ -27,4 +29,5 @@ public class KYWOController {
 		}
 		return resultMsg;
 	}
+
 }

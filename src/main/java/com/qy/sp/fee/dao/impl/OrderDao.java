@@ -24,6 +24,8 @@ public interface OrderDao {
     
     TOrder selectByPipleOrderId(String pipleOrderId);
 
+    List<TOrder> getOrderByPipleIdAndMobile(@Param("pipleId") String pipleId,@Param("mobile") String mobile);
+
     int updateByPrimaryKeySelective(TOrder record);
 
     int updateByPrimaryKey(TOrder record);

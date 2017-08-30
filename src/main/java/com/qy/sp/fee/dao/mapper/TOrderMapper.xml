@@ -47,12 +47,20 @@
     where PIPLE_ORDER_ID = #{pipleOrderId,jdbcType=VARCHAR}
   </select>
   <select id="selectByPipleKey" resultMap="BaseResultMap" parameterType="com.qy.sp.fee.dto.PipleOrderIdParam" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from t_order
     where PIPLE_ID = #{pipleID,jdbcType=VARCHAR}
       and PIPLE_ORDER_ID = #{pipleOrderID,jdbcType=VARCHAR}
   </select>
+
+    <select id="getOrderByPipleIdAndMobile" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from t_order
+        where PIPLE_ID = #{pipleId} AND mobile = #{mobile}
+    </select>
+
   <select id="getUnmatchProvinceMobiles" resultType="java.lang.String">
     select 
     DISTINCT(MOBILE) AS MOBILE

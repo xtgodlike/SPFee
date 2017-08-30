@@ -198,68 +198,6 @@ public class TQGXService extends ChannelService{
 		return null;
 	}
 	
-	
-	@Override
-	public String processPaySuccess(JSONObject requestBody) throws Exception {
-		logger.info("DXTVideoService 支付同步数据:"+requestBody);
-		String error = "error";
-		if(requestBody==null || "".equals(requestBody) || "{}".equals(requestBody.toString())){
-			return error;
-		}
-		String imsi = requestBody.optString("imsi");
-		String qid = requestBody.optString("qid");
-		String subscribe_time = requestBody.optString("subscribe_time");
-		String cp_param = requestBody.optString("cp_param");  // 我方订单号
-		String result = requestBody.optString("result");
-		String tran_id = requestBody.optString("tran_id");
-		TOrder order = tOrderDao.selectByPrimaryKey(cp_param);
-		if(order!=null ){ // 同步数据正确
-			try {
-				order.setPipleOrderId(tran_id); // 通道订单号
-				statistics(STEP_PAY_BASE_TO_PLATFORM, order.getGroupId(), requestBody.toString());
-				TChannelPipleKey pkey = new TChannelPipleKey();
-				pkey.setChannelId(order.getChannelId());
-				pkey.setPipleId(order.getPipleId());
-				TChannelPiple cp =  tChannelPipleDao.selectByPrimaryKey(pkey);
-				if(cp == null){
-                    return "channel error";
-                }
-				TProduct tProduct = this.tProductDao.selectByPrimaryKey(order.getProductId());
-				String productCode = tProduct.getProductCode();
-				//扣量
-				boolean bDeducted = false;
-				if(P_SUCCESS.equals(result)){
-                    order.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
-                    order.setSubStatus(PAY_SUCCESS);
-                    order.setModTime(DateTimeUtils.getCurrentTime());
-                    order.setCompleteTime(DateTimeUtils.getCurrentTime());
-                    order.setResultCode(result);
-                    doWhenPaySuccess(order);
-                    bDeducted  = order.deduct(cp.getVolt());  // 是否扣量
-                    if(!bDeducted){ // 不扣量 通知渠道
-    //				notifyChannel(cp.getNotifyUrl(), order.getMobile(),order.getImsi(),order.getOrderId(), productCode, order.getPipleId(),"ok",cpparam);
-    //				notifyChannel(cp.getNotifyUrl(), order, productCode, "ok");
-                        notifyChannelAPIForKey(cp.getNotifyUrl(),order,"ok");
-                    }
-                }else {
-                    order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-                    order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
-                    order.setModTime(DateTimeUtils.getCurrentTime());
-                    order.setResultCode(result);
-                }
-				SaveOrderUpdate(order);
-				return "ok";
-			} catch (Exception e) {
-				e.printStackTrace();
-				logger.info("DXTVideoService同步处理异常："+e.getMessage());
-				return "sync error";
-			}
-		}else{
-			return "order not exist";
-		}
-
-	}
-	
 	@Override
 	protected boolean isUseableTradeDayAndMonth() {
 		return true;
