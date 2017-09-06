@@ -70,6 +70,7 @@ public class TQGXService extends ChannelService{
 			order.setAccess_num(access_num);
 			SaveOrderInsert(order);
 		}
+		JSONObject resultJson = new JSONObject();
 		if(StringUtil.isNotEmptyString(params)) {
 			JSONObject paramsObj = JSONObject.fromObject(params);
 			if(paramsObj.has("linkId")) { // 为点播方式
@@ -109,7 +110,7 @@ public class TQGXService extends ChannelService{
 				order.setCorrelator(correlator);
 				order.setResultCode(OP_TYPE_DB);
 				SaveOrderInsert(order);
-			}else if(paramsObj.has("stream_no")) {
+			}else if(paramsObj.has("stream_no")) { // 包月方式
 				String mobile = paramsObj.getString("user_id");
 				String access_num = paramsObj.getString("access_num");
 				String sms = paramsObj.getString("order_string");
@@ -125,7 +126,16 @@ public class TQGXService extends ChannelService{
 				TProduct tProduct = tProductDao.selectByPrimaryKey(pipleProduct.getProductId());
 
 //				String sms = paramsObj.getString("order_string");  // 缺失指令
-				TOrder oldOrder = tOrderDao.selectByPipleOrderId(stream_no);
+//				TOrder oldOrder = tOrderDao.selectByPipleOrderId(stream_no);
+				// 根据通道ID和手机号关联
+				List<TOrder> orders = tOrderDao.getOrderByPipleIdAndMobile(getPipleId(),mobile);
+				TOrder oldOrder = null;
+				if(orders!=null && orders.size()>0){
+					oldOrder = orders.get(0);
+					log.info("TQGXService oldOrder orderId="+oldOrder.getOrderId()+",mobile="+oldOrder.getMobile());
+				}else {
+
+				}
 				TQGXOrder tqgxOrder = new TQGXOrder();
 				tqgxOrder.setTOrder(oldOrder);
 				tqgxOrder.setOrderStatus(GlobalConst.OrderStatus.INIT);
@@ -139,7 +149,6 @@ public class TQGXService extends ChannelService{
 				SaveOrderUpdate(tqgxOrder);
 			}
 			// 返回响应数据
-			JSONObject resultJson = new JSONObject();
 			resultJson.put("content","");
 			resultJson.put("blackflag","0");   // 0正常  1黑名单
 			return resultJson;
@@ -170,11 +179,10 @@ public class TQGXService extends ChannelService{
 							}else {
 								order.setSubStatus(GlobalConst.SubStatus.PAY_SUCCESS_DG);
 							}
-
 							order.setModTime(DateTimeUtils.getCurrentTime());
 							order.setCompleteTime(DateTimeUtils.getCurrentTime());
-							order.setResultCode(result);
 							doWhenPaySuccess(order);
+
 							bDeducted  = order.deduct(cp.getVolt());  // 是否扣量
 							if(!bDeducted){ // 不扣量 通知渠道
 								notifyChannelAPIForKey(cp.getNotifyUrl(),order,"ok");
@@ -194,6 +202,7 @@ public class TQGXService extends ChannelService{
 				order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
 				order.setModTime(DateTimeUtils.getCurrentTime());
 			}
+			SaveOrderUpdate(order);
 		}
 		return null;
 	}
