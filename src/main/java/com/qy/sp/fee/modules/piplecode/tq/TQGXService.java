@@ -30,7 +30,7 @@ public class TQGXService extends ChannelService{
 	private  Logger log = Logger.getLogger(TQGXService.class);
 	@Override
 	public String getPipleId() {
-		return "14958555721785335696481";
+		return "15040101351485677882939";
 	}
 
 	@Override
@@ -42,6 +42,7 @@ public class TQGXService extends ChannelService{
 		log.info("TQGXService params:"+params);
 		log.info("TQGXService order_string:"+order_string);
 		log.info("TQGXService orderResult:"+orderResult);
+		JSONObject resultJson = new JSONObject();
 		TQGXOrder order = new TQGXOrder();
 		String groupId = KeyHelper.createKey();
 		if(StringUtil.isNotEmptyString(order_string)) {
@@ -51,26 +52,46 @@ public class TQGXService extends ChannelService{
 			String mobile = orderStringObj.getString("user_id");
 			String access_num = orderStringObj.getString("access_num");
 //			String stream_no = orderStringObj.getString("stream_no");  // 缺失通道订单号
+			String[] smsStr = sms.split("#");  // order_string 指令#后拓展信息（前4位为apiKey，之后数据为渠道拓展）
+			String feeCode = smsStr[0];
+			String apiKey = null;
+			String extData = null;
+			TChannel channel = null;
+			if(smsStr.length>2){ // 有#扩展数据
+				String extStr = smsStr[1];
+				if(extStr.length()>4){
+					apiKey = extStr.substring(0,4);
 
-			String[] smsStr = sms.split("#");  // order_string 指令#后4位拓展字段定义为渠道apiKey
-			String apiKey = smsStr[1];
-			TChannel channel = tChannelDao.selectByApiKey(apiKey);
+					extData = extStr.substring(4,extStr.length());
+				}
+			}else{ // 无拓展数据 默认apiKey=1003 千雅内部渠道
+				apiKey = "1003";
+			}
+			channel = tChannelDao.selectByApiKey(apiKey);
+			TPipleProduct ppkey = new TPipleProduct();
+			ppkey.setPipleId(getPipleId());
+			ppkey.setPipleProductCode(feeCode);
+			TPipleProduct pipleProduct = tPipleProductDao.selectByPipleProductCode(ppkey);
+			TProduct product = tProductDao.selectByPrimaryKey(pipleProduct.getProductId());
 			order.setOrderId(KeyHelper.createKey());
 			order.setPipleId(getPipleId());
-			order.setChannelId(channel.getChannelId());
+			order.setChannelId(channel==null?null:channel.getChannelId());
+			order.setProductId(product.getProductId());  // 默认10元
 			order.setMobile(mobile);
 			order.setOrderStatus(GlobalConst.OrderStatus.INIT);
 			order.setSubStatus(GlobalConst.SubStatus.PAY_INIT);
 			order.setCreateTime(DateTimeUtils.getCurrentTime());
 			order.setModTime(DateTimeUtils.getCurrentTime());
+			order.setAmount(new BigDecimal(product.getPrice()/100.0));
 			int  provinceId = this.getProvinceIdByMobile(mobile, false); // 获取省份ID
 			order.setProvinceId(provinceId);
+			order.setExtData(extData);
 			order.setGroupId(groupId);
 			order.setOrder_string(order_string);
 			order.setAccess_num(access_num);
 			SaveOrderInsert(order);
+			return resultJson;
 		}
-		JSONObject resultJson = new JSONObject();
 		if(StringUtil.isNotEmptyString(params)) {
 			JSONObject paramsObj = JSONObject.fromObject(params);
 			if(paramsObj.has("linkId")) { // 为点播方式
@@ -82,19 +103,32 @@ public class TQGXService extends ChannelService{
 				String linkId = paramsObj.getString("linkId");
 				String correlator = paramsObj.getString("correlator");
 
-				String[] smsStr = sms.split("#");  // order_string 指令#后4位拓展字段定义为渠道apiKey
-				String apiKey = smsStr[1];
-				TChannel channel = tChannelDao.selectByApiKey(apiKey);
+				String[] smsStr = sms.split("#");  // order_string 指令#后拓展信息（前4位为apiKey，之后数据为渠道拓展）
+				String feeCode = smsStr[0];
+				String apiKey = null;
+				String extData = null;
+				TChannel channel = null;
+				if(smsStr.length>2){ // 有#扩展数据
+					String extStr = smsStr[1];
+					if(extStr.length()>4){
+						apiKey = extStr.substring(0,4);
 
+						extData = extStr.substring(4,extStr.length());
+					}
+				}else{ // 无拓展数据 默认apiKey=1003 千雅内部渠道
+					apiKey = "1003";
+				}
+				channel = tChannelDao.selectByApiKey(apiKey);
 				TPipleProduct ppkey = new TPipleProduct();
 				ppkey.setPipleId(getPipleId());
-				ppkey.setPipleProductCode(ismp_product_id);
+				ppkey.setPipleProductCode(feeCode);
 				TPipleProduct pipleProduct = tPipleProductDao.selectByPipleProductCode(ppkey);
 				TProduct tProduct = tProductDao.selectByPrimaryKey(pipleProduct.getProductId());
 
 				order.setOrderId(KeyHelper.createKey());
 				order.setPipleOrderId(linkId);
 				order.setPipleId(getPipleId());
+				order.setProductId(tProduct.getProductId());
 				order.setChannelId(channel.getChannelId());
 				order.setMobile(mobile);
 				order.setOrderStatus(GlobalConst.OrderStatus.TRADING);
@@ -113,24 +147,16 @@ public class TQGXService extends ChannelService{
 			}else if(paramsObj.has("stream_no")) { // 包月方式
 				String mobile = paramsObj.getString("user_id");
 				String access_num = paramsObj.getString("access_num");
-				String sms = paramsObj.getString("order_string");
 				String ismp_product_id = paramsObj.getString("ismp_product_id"); // 计费点代码
 				String op_type = paramsObj.getString("op_type");
 				String stream_no = paramsObj.getString("stream_no");
 				String correlator = paramsObj.getString("correlator");
-
-				TPipleProduct ppkey = new TPipleProduct();
-				ppkey.setPipleId(getPipleId());
-				ppkey.setPipleProductCode(ismp_product_id);
-				TPipleProduct pipleProduct = tPipleProductDao.selectByPipleProductCode(ppkey);
-				TProduct tProduct = tProductDao.selectByPrimaryKey(pipleProduct.getProductId());
-
 //				String sms = paramsObj.getString("order_string");  // 缺失指令
 //				TOrder oldOrder = tOrderDao.selectByPipleOrderId(stream_no);
 				// 根据通道ID和手机号关联
 				List<TOrder> orders = tOrderDao.getOrderByPipleIdAndMobile(getPipleId(),mobile);
 				TOrder oldOrder = null;
-				if(orders!=null && orders.size()>0){
+				if(orders!=null){
 					oldOrder = orders.get(0);
 					log.info("TQGXService oldOrder orderId="+oldOrder.getOrderId()+",mobile="+oldOrder.getMobile());
 				}else {
@@ -138,10 +164,9 @@ public class TQGXService extends ChannelService{
 				}
 				TQGXOrder tqgxOrder = new TQGXOrder();
 				tqgxOrder.setTOrder(oldOrder);
-				tqgxOrder.setOrderStatus(GlobalConst.OrderStatus.INIT);
-				tqgxOrder.setSubStatus(GlobalConst.SubStatus.PAY_INIT);
+				tqgxOrder.setOrderStatus(GlobalConst.OrderStatus.TRADING);
+				tqgxOrder.setSubStatus(GlobalConst.SubStatus.PAY_SEND_MESSAGE_SUCCESS);
 				tqgxOrder.setModTime(DateTimeUtils.getCurrentTime());
-				tqgxOrder.setAmount(new BigDecimal(tProduct.getPrice()/100.0));
 				int  provinceId = this.getProvinceIdByMobile(mobile, false); // 获取省份ID
 				tqgxOrder.setProvinceId(provinceId);
 				tqgxOrder.setCorrelator(correlator);
@@ -155,11 +180,12 @@ public class TQGXService extends ChannelService{
 		}
 		// 同步交易结果
 		if(StringUtil.isNotEmptyString(orderResult)) {
-			JSONObject orderResultObj = JSONObject.fromObject(params);
+			JSONObject orderResultObj = JSONObject.fromObject(orderResult);
 			String linkId = null;
 			if(orderResultObj.has("linkId")) {
 				linkId = orderResultObj.getString("linkId");
-			}else if(orderResultObj.has("stream_no")) {
+			}
+			if(StringUtil.isEmpty(linkId) && orderResultObj.has("stream_no")) {
 				linkId = orderResultObj.getString("stream_no");
 			}
 			TOrder nowOrder = tOrderDao.selectByPipleOrderId(linkId);
@@ -204,9 +230,9 @@ public class TQGXService extends ChannelService{
 			}
 			SaveOrderUpdate(order);
 		}
-		return null;
+		return resultJson;
 	}
-	
+
 	@Override
 	protected boolean isUseableTradeDayAndMonth() {
 		return true;
