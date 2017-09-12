@@ -143,6 +143,7 @@ public class TQGXService extends ChannelService{
 				order.setAccess_num(access_num);
 				order.setCorrelator(correlator);
 				order.setResultCode(OP_TYPE_DB);
+				order.setExtData(extData);
 				SaveOrderInsert(order);
 			}else if(paramsObj.has("stream_no")) { // 包月方式
 				String mobile = paramsObj.getString("user_id");
@@ -215,12 +216,12 @@ public class TQGXService extends ChannelService{
 							}
 						}else if(nowOrder.getResultCode().equals(OP_TYPE_TD)) {
 							order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-							order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
+							order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR_TG);
 							order.setModTime(DateTimeUtils.getCurrentTime());
 						}
 					}else {
 						order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-						order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR_TG);
+						order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
 						order.setModTime(DateTimeUtils.getCurrentTime());
 					}
 			}else {
