@@ -23,7 +23,8 @@ public class RHWoService extends ChannelService {
 	public final static int PAY_FAIL = 4;
 	public final static String GETSMS_SUCCESS = "0";  // 下短信接口成功
 	public final static String PAYRES_SUCCESS = "4";  // 计费接口成功
-	public final static String SYNC_P_SUCCESS = "6";	  // 同步计费成功
+	public final static String SYNC_P_SUCCESS = "4";	  // 同步计费成功
+//	public final static String SYNC_P_SUCCESS = "6";	  // 同步计费成功
 	public final static String SYNC_P_FAIL = "7";	  // 同步计费失败
 	private  Logger log = Logger.getLogger(RHWoService.class);
 	@Override
