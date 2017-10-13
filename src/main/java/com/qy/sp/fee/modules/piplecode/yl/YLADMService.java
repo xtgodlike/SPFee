@@ -1,47 +1,23 @@
-package com.qy.sp.fee.modules.piplecode.zsadm;
+package com.qy.sp.fee.modules.piplecode.yl;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
-import org.apache.log4j.Logger;
-import org.springframework.stereotype.Service;
-
-import com.qy.sp.fee.common.utils.DateTimeUtils;
-import com.qy.sp.fee.common.utils.GlobalConst;
-import com.qy.sp.fee.common.utils.HttpClientUtils;
-import com.qy.sp.fee.common.utils.KeyHelper;
-import com.qy.sp.fee.common.utils.MD5;
-import com.qy.sp.fee.common.utils.MapUtil;
-import com.qy.sp.fee.common.utils.StringUtil;
-import com.qy.sp.fee.dto.TChannel;
-import com.qy.sp.fee.dto.TChannelPiple;
-import com.qy.sp.fee.dto.TChannelPipleKey;
-import com.qy.sp.fee.dto.TOrder;
-import com.qy.sp.fee.dto.TOrderExt;
-import com.qy.sp.fee.dto.TOrderExtKey;
-import com.qy.sp.fee.dto.TPiple;
-import com.qy.sp.fee.dto.TPipleProduct;
-import com.qy.sp.fee.dto.TPipleProductKey;
-import com.qy.sp.fee.dto.TProduct;
+import com.qy.sp.fee.common.utils.*;
+import com.qy.sp.fee.dto.*;
 import com.qy.sp.fee.entity.BaseChannelRequest;
 import com.qy.sp.fee.entity.BaseResult;
 import com.qy.sp.fee.modules.piplecode.base.ChannelService;
-import com.qy.sp.fee.modules.piplecode.ds.DSWoService.DSWORdoOrder;
+import net.sf.json.JSONObject;
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
-public class ZSADMService extends ChannelService{
-	private Logger log = Logger.getLogger(ZSADMService.class);
+public class YLADMService extends ChannelService{
+	private Logger log = Logger.getLogger(YLADMService.class);
 	
 	private final static String REQ_SUCCESS = "SUCCESS";   // 请求成功
 	private final static String SEND_FAIL = "1";   // 短信发送失败
@@ -50,12 +26,12 @@ public class ZSADMService extends ChannelService{
 	private final static String PAY_SUCCESS = "2";   //  扣费成功
 	@Override
 	public String getPipleId() {
-		return "14780541337500310032872";
+		return "15077763368772452263859";
 	}
 
 	@Override
 	public String getPipleKey() {
-		return "PM1047";
+		return "PM1086";
 	}
 	
 	@Override
@@ -64,10 +40,10 @@ public class ZSADMService extends ChannelService{
 		String productCode = requestBody.optString("productCode");
 		String apiKey = requestBody.optString("apiKey");
 		String mobile = requestBody.optString("mobile");
-		String pipleId = requestBody.optString("pipleId");
+		String pipleKey = requestBody.optString("pipleKey");
 		String imsi = requestBody.optString("imsi");
 		String extData = requestBody.optString("extData");
-		if(StringUtil.isEmptyString(productCode) || StringUtil.isEmptyString(apiKey)   || StringUtil.isEmpty(pipleId)){
+		if(StringUtil.isEmptyString(productCode) || StringUtil.isEmptyString(apiKey)   || StringUtil.isEmpty(pipleKey)){
 			result.put("resultCode",GlobalConst.CheckResult.MUST_PARAM_ISNULL+"");
 			result.put("resultMsg",GlobalConst.CheckResultDesc.message.get(GlobalConst.CheckResult.MUST_PARAM_ISNULL));
 			return result;
@@ -78,7 +54,7 @@ public class ZSADMService extends ChannelService{
 			req.setProductCode(productCode);
 			req.setMobile(mobile);
 			// 调用合法性校验
-			BaseResult bResult = this.accessVerify(req,pipleId);
+			BaseResult bResult = this.accessVerify(req,getPipleId());
 			if(bResult!=null){// 返回不为空则校验不通过
 				result.put("resultCode",bResult.getResultCode());
 				result.put("resultMsg",bResult.getResultMsg());
@@ -90,15 +66,15 @@ public class ZSADMService extends ChannelService{
 			TChannel tChannel = tChannelDao.selectByApiKey(req.getApiKey());
 			TProduct tProduct = tProductDao.selectByCode(req.getProductCode());
 			TPipleProductKey ppkey = new TPipleProductKey();
-			ppkey.setPipleId(pipleId);
+			ppkey.setPipleId(getPipleId());
 			ppkey.setProductId(tProduct.getProductId());
 			TPipleProduct pipleProduct = tPipleProductDao.selectByPrimaryKey(ppkey);
-			TPiple piple = tPipleDao.selectByPrimaryKey(pipleId);
+			TPiple piple = tPipleDao.selectByPrimaryKey(getPipleId());
 			//保存订单
 			ZSADMOrder order = new ZSADMOrder();
 			order.setOrderId(KeyHelper.createKey());
 			order.setGroupId(groupId);
-			order.setPipleId(pipleId);
+			order.setPipleId(getPipleId());
 			order.setChannelId(tChannel.getChannelId());
 			order.setMobile(mobile);
 			order.setImsi(imsi);
