@@ -914,7 +914,7 @@ public class BaseService {
 				TProduct product = tProductDao.selectByPrimaryKey(order.getProductId());
 				TPiple tPiple = tPipleDao.selectByPrimaryKey(order.getPipleId());
 				TChannel tChannel = tChannelDao.selectByPrimaryKey(order.getChannelId());
-				param += "&productCode="+product.getProductCode()+"&pipleId="+tPiple.getPipleId()+"&apiKey="+tChannel.getApiKey();
+				param += "&productCode="+product.getProductCode()+"&pipleKey="+tPiple.getPipleNumber()+"&apiKey="+tChannel.getApiKey();
 				if(!StringUtil.isEmpty(order.getImsi())){
 					param += "&imsi="+order.getImsi();
 				}

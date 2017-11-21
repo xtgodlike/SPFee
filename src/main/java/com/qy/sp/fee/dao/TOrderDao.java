@@ -40,6 +40,10 @@ public class TOrderDao {
     	return orderDao.selectByPipleOrderId(pipleOrderId);
     }
 
+    public List<TOrder> getOrderByPipleIdAndMobile(String pipleId,String mobile){
+        return orderDao.getOrderByPipleIdAndMobile(pipleId,mobile);
+    }
+
     public int updateByPrimaryKeySelective(TOrder record){
     	return orderDao.updateByPrimaryKeySelective(record);
     }
