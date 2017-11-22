@@ -62,8 +62,8 @@ public class QYVACTService extends ChannelService{
 				String myApiKey = null;
 				String myExtData = null;
 				if(!StringUtil.isEmpty(momsgArr[2]) && momsgArr[2].length() >= 4){
-					myApiKey = momsgArr[2].substring(4,8);
-					myExtData = momsgArr[2].substring(8,momsgArr[2].length());
+					myApiKey = momsgArr[2].substring(0,4);
+					myExtData = momsgArr[2].substring(4,momsgArr[2].length());
 				}else{
 					myApiKey = "1003"; // 默认公司自有渠道
 				}
