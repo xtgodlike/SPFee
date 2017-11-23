@@ -312,4 +312,128 @@ public class TQGXService extends ChannelService{
 			return tOrderExts;
 		}
 	}
+
+	public String getVerifyCode(String mobile){
+		JSONObject result = new JSONObject();
+		try {
+			if(StringUtil.isEmpty(mobile)){
+				result.put("resultCode",GlobalConst.Result.ERROR);
+				result.put("resultMsg","必填参数不能为空");
+			}
+			HashMap<String,String> parameters = new HashMap<String, String>();
+			String uri = "http://61.160.185.51:9250/ismp/serviceOrder?action=subscribe";
+			String spId = "11105199";
+			String chargeId = "2001";
+			String timestamp = DateTimeUtils.getCurrentYMDHMSNo();
+			String sercet = "1a9311163d2a432bd4a8";
+			// SHA1(chargeId+timestamp+sercet)
+			String token = SecurityUtils.getSha1(chargeId+timestamp+sercet);
+			parameters.put("spId", spId);
+			parameters.put("chargeId", chargeId);
+			parameters.put("orderType", 1+"");
+			parameters.put("timestamp", timestamp);
+			parameters.put("accessToken", token);
+			parameters.put("imsi", "460016878515303");
+			parameters.put("ip", "123.56.158.156");
+			log.info("getOrderId 获取订单号接口请求：uri="+uri+",params="+parameters.toString());
+			String returnData = HttpClientUtils.doPost("http://61.160.185.51:9250/ismp/serviceOrder?action=subscribe",parameters,"utf-8");
+			log.info("getOrderId 获取订单号接口响应：returnData="+returnData);
+			String orderId = null;
+			if(StringUtil.isNotEmptyString(returnData)){
+				JSONObject object = JSONObject.fromObject(returnData);
+				String resultCode = object.optString("errcode");
+				String resultMsg = object.optString("errmsg");
+				if("0".equals(resultCode) || "159".equals(resultCode)){ // 0为成功 159获取号码失败但是orderinfo会返回 其他失败
+					String orderinfo = object.optString("orderinfo");
+					JSONObject orderObj = JSONObject.fromObject(orderinfo);
+					orderId = orderObj.optString("orderId");
+					result.put("orderId",orderId);
+					result.put("resultCode",resultCode);
+					result.put("resultMsg",resultMsg);
+				}else {
+					result.put("resultCode",resultCode);
+					result.put("resultMsg",resultMsg);
+				}
+			}else{
+				result.put("resultCode",GlobalConst.Result.ERROR);
+				result.put("resultMsg","获取订单号接口响应为空.");
+
+			}
+			// 获取订单号成功 提交手机号获取验证码
+			if(StringUtil.isNotEmptyString(orderId)){
+				HashMap<String,String> getCodeParams = new HashMap<String, String>();
+				getCodeParams.put("orderId",orderId);
+				getCodeParams.put("phoneNum",mobile);
+				log.info("getCode 获取验证码接口请求：uri="+uri+",params="+getCodeParams.toString());
+				String getCodeData = HttpClientUtils.doPost("http://61.160.185.51:9250/ismp/serviceOrder?action=subscribe",getCodeParams,"utf-8");
+				log.info("getCode 获取验证码接口响应：getCodeData="+getCodeData);
+				if(StringUtil.isNotEmptyString(getCodeData)){
+					JSONObject object = JSONObject.fromObject(getCodeData);
+					String resultCode = object.optString("errcode");
+					String resultMsg = object.optString("errmsg");
+					if("0".equals(resultCode)){ // 0为成功 其他失败
+						result.put("resultCode",resultCode);
+						result.put("resultMsg",resultMsg);
+					}else {
+						result.put("resultCode",resultCode);
+						result.put("resultMsg",resultMsg);
+					}
+				}else{
+					result.put("resultCode",GlobalConst.Result.ERROR);
+					result.put("resultMsg","获取验证码接口响应为空.");
+
+				}
+			}
+			return result.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.info("获取验证码失败："+e.getMessage(),e);
+			result.put("resultCode",GlobalConst.Result.ERROR);
+			result.put("resultMsg","获取验证码失败："+e.getMessage());
+			return result.toString();
+		}
+	}
+
+
+	public String submitVerifyCode(String orderId,String mobile,String verifyCode){
+		JSONObject result = new JSONObject();
+		try {
+			if(StringUtil.isEmpty(orderId) || StringUtil.isEmpty(mobile) || StringUtil.isEmpty(verifyCode)){
+				result.put("resultCode",GlobalConst.Result.ERROR);
+				result.put("resultMsg","必填参数不能为空");
+			}
+			String uri = "http://61.160.185.51:9250/ismp/serviceOrder?action=subscribe";
+			// 获取订单号成功 提交手机号获取验证码
+			HashMap<String,String> submitParams = new HashMap<String, String>();
+			submitParams.put("orderId",orderId);
+			submitParams.put("phoneNum",mobile);
+			submitParams.put("verCode",verifyCode);
+			log.info("submitCode 提交验证码接口请求：uri="+uri+",params="+submitParams.toString());
+			String submitReData = HttpClientUtils.doPost("http://61.160.185.51:9250/ismp/serviceOrder?action=subscribe",submitParams,"utf-8");
+			log.info("submitCode 提交验证码接口响应：submitReData="+submitReData);
+			if(StringUtil.isNotEmptyString(submitReData)){
+				JSONObject object = JSONObject.fromObject(submitReData);
+				String resultCode = object.optString("errcode");
+				String resultMsg = object.optString("errmsg");
+				if("0".equals(resultCode)){ // 0为成功 其他失败
+					result.put("resultCode",resultCode);
+					result.put("resultMsg",resultMsg);
+				}else {
+					result.put("resultCode",resultCode);
+					result.put("resultMsg",resultMsg);
+				}
+			}else{
+				result.put("resultCode",GlobalConst.Result.ERROR);
+				result.put("resultMsg","提交验证码接口响应为空.");
+
+			}
+			return result.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.info("提交验证码失败："+e.getMessage(),e);
+			result.put("resultCode",GlobalConst.Result.ERROR);
+			result.put("resultMsg","提交验证码失败："+e.getMessage());
+			return result.toString();
+		}
+	}
 }

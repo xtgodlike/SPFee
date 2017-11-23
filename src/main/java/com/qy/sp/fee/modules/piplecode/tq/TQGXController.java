@@ -13,7 +13,7 @@ import java.io.PrintWriter;
 
 @Controller
 @RequestMapping(value = "/piple")
-public class TQGXController {
+public class TQGXController 	{
 
 	@Resource
 	private TQGXService tqgxService;
@@ -33,6 +33,32 @@ public class TQGXController {
 			resultMsg = resultJson.toString();
 		}
 		catch(Exception e){
+			e.printStackTrace();
+		}
+		return resultMsg;
+	}
+
+	@RequestMapping(value = "/tqgx/getCode" ,produces = {"application/json;charset=UTF-8"})
+	@ResponseBody
+	public String getCode(String mobile){
+		String resultMsg = "error";
+		try{
+			resultMsg = tqgxService.getVerifyCode(mobile);
+			return resultMsg;
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return resultMsg;
+	}
+
+	@RequestMapping(value = "/tqgx/submitCode" ,produces = {"application/json;charset=UTF-8"})
+	@ResponseBody
+	public String submitCode(String orderId,String mobile,String vCode){
+		String resultMsg = "error";
+		try{
+			resultMsg = tqgxService.submitVerifyCode(orderId,mobile,vCode);
+			return resultMsg;
+		}catch(Exception e){
 			e.printStackTrace();
 		}
 		return resultMsg;

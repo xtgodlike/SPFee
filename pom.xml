@@ -228,6 +228,13 @@
 			<artifactId>dom4j</artifactId>
 			<version>1.6.1</version>
 		</dependency>
+
+	  <!-- 跨域过滤器相关 -->
+	  <dependency>
+		  <groupId>com.thetransactioncompany</groupId>
+		  <artifactId>java-property-utils</artifactId>
+		  <version>1.9.1</version>
+	  </dependency>
   </dependencies>
 	<build>
 		<finalName>spfee</finalName>
