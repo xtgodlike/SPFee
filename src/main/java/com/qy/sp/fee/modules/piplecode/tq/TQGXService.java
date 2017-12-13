@@ -199,7 +199,12 @@ public class TQGXService extends ChannelService{
 						jkdgOrder.setProductId(product.getProductId());
 						jkdgOrder.setMobile(mobile);
 						jkdgOrder.setOrderStatus(GlobalConst.OrderStatus.INIT);
-						jkdgOrder.setSubStatus(GlobalConst.SubStatus.PAY_INIT);
+						if(op_type.equals(OP_TYPE_TD)){
+							jkdgOrder.setSubStatus(GlobalConst.SubStatus.PAY_ERROR_TG);
+						}else {
+							jkdgOrder.setSubStatus(GlobalConst.SubStatus.PAY_INIT);
+						}
+						jkdgOrder.setResultCode(op_type);
 						jkdgOrder.setCreateTime(DateTimeUtils.getCurrentTime());
 						jkdgOrder.setModTime(DateTimeUtils.getCurrentTime());
 						jkdgOrder.setAmount(new BigDecimal(product.getPrice()/100.0));
@@ -208,7 +213,6 @@ public class TQGXService extends ChannelService{
 						jkdgOrder.setGroupId(groupId);
 						jkdgOrder.setAccess_num(access_num);
 						jkdgOrder.setCorrelator(correlator);
-						order.setResultCode(OP_TYPE_BY);
 						SaveOrderInsert(jkdgOrder);
 					}
 				}
@@ -232,43 +236,43 @@ public class TQGXService extends ChannelService{
 			if(nowOrder!=null) {
 				statistics(STEP_PAY_BASE_TO_PLATFORM, nowOrder.getGroupId(), orderResult);
 				TChannelPipleKey pkey = new TChannelPipleKey();
-				pkey.setChannelId(order.getChannelId());
-				pkey.setPipleId(order.getPipleId());
+				pkey.setChannelId(nowOrder.getChannelId());
+				pkey.setPipleId(nowOrder.getPipleId());
 				TChannelPiple cp =  tChannelPipleDao.selectByPrimaryKey(pkey);
 				String result = orderResultObj.getString("result");
 				if(result.equals(P_SUCCESS)) {
 						if(nowOrder.getResultCode().equals(OP_TYPE_DB) || nowOrder.getResultCode().equals(OP_TYPE_BY)) {
 							boolean bDeducted = false; // 扣量
-							order.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
+							nowOrder.setOrderStatus(GlobalConst.OrderStatus.SUCCESS);
 							if(nowOrder.getResultCode().equals(OP_TYPE_DB)) {
-								order.setSubStatus(GlobalConst.SubStatus.PAY_SUCCESS);
+								nowOrder.setSubStatus(GlobalConst.SubStatus.PAY_SUCCESS);
 							}else {
-								order.setSubStatus(GlobalConst.SubStatus.PAY_SUCCESS_DG);
+								nowOrder.setSubStatus(GlobalConst.SubStatus.PAY_SUCCESS_DG);
 							}
-							order.setModTime(DateTimeUtils.getCurrentTime());
-							order.setCompleteTime(DateTimeUtils.getCurrentTime());
-							doWhenPaySuccess(order);
+							nowOrder.setModTime(DateTimeUtils.getCurrentTime());
+							nowOrder.setCompleteTime(DateTimeUtils.getCurrentTime());
+							doWhenPaySuccess(nowOrder);
 
-							bDeducted  = order.deduct(cp.getVolt());  // 是否扣量
+							bDeducted  = nowOrder.deduct(cp.getVolt());  // 是否扣量
 							if(!bDeducted){ // 不扣量 通知渠道
 								notifyChannelAPIForKey(cp.getNotifyUrl(),order,"ok");
 							}
 						}else if(nowOrder.getResultCode().equals(OP_TYPE_TD)) {
-							order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-							order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR_TG);
-							order.setModTime(DateTimeUtils.getCurrentTime());
+							nowOrder.setOrderStatus(GlobalConst.OrderStatus.FAIL);
+							nowOrder.setSubStatus(GlobalConst.SubStatus.PAY_ERROR_TG);
+							nowOrder.setModTime(DateTimeUtils.getCurrentTime());
 						}
 					}else {
-						order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-						order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
-						order.setModTime(DateTimeUtils.getCurrentTime());
+						nowOrder.setOrderStatus(GlobalConst.OrderStatus.FAIL);
+						nowOrder.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
+						nowOrder.setModTime(DateTimeUtils.getCurrentTime());
 					}
 			}else {
-				order.setOrderStatus(GlobalConst.OrderStatus.FAIL);
-				order.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
-				order.setModTime(DateTimeUtils.getCurrentTime());
+				nowOrder.setOrderStatus(GlobalConst.OrderStatus.FAIL);
+				nowOrder.setSubStatus(GlobalConst.SubStatus.PAY_ERROR);
+				nowOrder.setModTime(DateTimeUtils.getCurrentTime());
 			}
-			SaveOrderUpdate(order);
+			SaveOrderUpdate(nowOrder);
 		}
 		return resultJson;
 	}
